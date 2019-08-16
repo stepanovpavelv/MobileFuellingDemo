@@ -9,8 +9,8 @@
         public decimal Quantity { get; set; }
         public long FuelTypeId { get; set; }
         public FuelType FuelType { get; set; }
-        public string Latitude { get; set; }
-        public string Longitude { get; set; }
+        public float? Latitude { get; set; }
+        public float? Longitude { get; set; }
         public string Address { get; set; }
     }
 }
