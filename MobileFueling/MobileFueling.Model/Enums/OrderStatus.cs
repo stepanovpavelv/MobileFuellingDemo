@@ -7,9 +7,6 @@
     {
         Created = 0,
         DriverAssigned,
-        FuelIsDrained,
-        AwaitingPayment,
-        Paid,
         Completed,
         Cancelled
     }
