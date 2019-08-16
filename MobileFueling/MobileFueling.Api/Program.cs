@@ -12,6 +12,7 @@ namespace MobileFueling.Api
 {
     public class Program
     {
+        // не забыть прикрутить swagger
         public static void Main(string[] args)
         {
             CreateWebHostBuilder(args).Build().Run();
