@@ -36,8 +36,8 @@ namespace MobileFueling.DB
             builder.Entity<ClientOrderDetalization>().HasKey(x => x.Id);
             builder.Entity<ClientOrderDetalization>().HasOne(x => x.FuelType).WithMany().HasForeignKey(x => x.FuelTypeId);
             builder.Entity<ClientOrderDetalization>().Property(x => x.Address).HasMaxLength(250);
-            builder.Entity<ClientOrderDetalization>().Property(x => x.Latitude).HasColumnType("float(10,6)");
-            builder.Entity<ClientOrderDetalization>().Property(x => x.Longitude).HasColumnType("float(10,6)");
+            builder.Entity<ClientOrderDetalization>().Property(x => x.Latitude).HasColumnType("decimal(10,6)");
+            builder.Entity<ClientOrderDetalization>().Property(x => x.Longitude).HasColumnType("decimal(10,6)");
 
             // driver's order's detalizations
             builder.Entity<DriverOrderDetalization>().ToTable("DriverOrderDetalizations");

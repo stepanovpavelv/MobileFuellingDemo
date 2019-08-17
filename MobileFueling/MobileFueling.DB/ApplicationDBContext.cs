@@ -4,10 +4,10 @@ using MobileFueling.Model;
 
 namespace MobileFueling.DB
 {
-    public class ApplicationDbContext :
+    public class FuelDbContext :
         IdentityDbContext<ApplicationUser, ApplicationRole, long, ApplicationUserClaim, ApplicationUserRole, ApplicationUserLogin, ApplicationRoleClaim, ApplicationUserToken>
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        public FuelDbContext(DbContextOptions<FuelDbContext> options) : base(options)
         { }
 
         protected override void OnModelCreating(ModelBuilder builder)
