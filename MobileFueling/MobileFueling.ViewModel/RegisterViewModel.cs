@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace MobileFueling.ViewModel
 {
@@ -16,5 +17,18 @@ namespace MobileFueling.ViewModel
 
         [Required]
         public short UserType { get; set; }
+
+        public DateTime? DateOfBirth { get; set; }
+
+        [Phone]
+        public string PhoneNumber { get; set; }
+
+        [Required]
+        public string Name { get; set; }
+
+        [Required]
+        public string FirstName { get; set; }
+
+        public string MiddleName { get; set; }
     }
 }

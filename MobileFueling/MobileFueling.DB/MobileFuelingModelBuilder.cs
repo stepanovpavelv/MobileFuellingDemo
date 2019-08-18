@@ -7,6 +7,11 @@ namespace MobileFueling.DB
     {
         public static void OnModelCreating(ModelBuilder builder)
         {
+            // application roles
+            builder.Entity<ApplicationRole>().HasData(
+                new ApplicationRole { Id = 1, Name = "Admin", NormalizedName = "ADMIN" }
+            );
+
             // fuel types
             builder.Entity<FuelType>().ToTable("FuelTypes");
             builder.Entity<FuelType>().HasKey(x => x.Id);
