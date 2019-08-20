@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
 using MobileFueling.Api.Common.BaseResponseResources;
+using MobileFueling.Api.Common.Localization;
 using MobileFueling.Api.Contract;
 using MobileFueling.Model;
 using MobileFueling.Model.Enums;
@@ -74,6 +76,13 @@ namespace MobileFueling.Api.ApiModels.User
                     return response;
                 }
 
+                var loginClaim = await GetUserClaimAsync(userManager, applicationUser, UserConstants.CanLogin);
+                if (loginClaim == null || loginClaim.Value == "0")
+                {
+                    response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.USER_CAN_NOT_LOGIN]);
+                    return response;
+                }
+
                 // заполнение в identity клеймов и другое
                 var encodedKey = Encoding.UTF8.GetBytes(configuration["Jwt:SigningKey"]);
                 var signingKey = new SymmetricSecurityKey(encodedKey);
@@ -106,7 +115,8 @@ namespace MobileFueling.Api.ApiModels.User
             var userClaims = new List<Claim>
                     {
                         new Claim(UserConstants.Name, viewModel.Name),
-                        new Claim(UserConstants.FirstName, viewModel.FirstName)
+                        new Claim(UserConstants.FirstName, viewModel.FirstName),
+                        new Claim(UserConstants.CanLogin, "1")
                     };
 
             if (!string.IsNullOrEmpty(viewModel.MiddleName))
@@ -119,6 +129,12 @@ namespace MobileFueling.Api.ApiModels.User
             }
 
             await userManager.AddClaimsAsync(applicationUser, userClaims);
+        }
+
+        private async Task<Claim> GetUserClaimAsync(UserManager<ApplicationUser> userManager, ApplicationUser applicationUser, string claimName)
+        {
+            var allUserClaims = await userManager.GetClaimsAsync(applicationUser).ConfigureAwait(false);
+            return allUserClaims.FirstOrDefault(x => x.Type == claimName);
         }
     }
 }

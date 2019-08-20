@@ -9,10 +9,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
-using MobileFueling.Api.Common.BaseResponseResources;
+using MobileFueling.Api.Common.Localization;
 using MobileFueling.DB;
 using MobileFueling.Model;
+using System;
 using System.Globalization;
+using System.IO;
+using System.Reflection;
 using System.Text;
 
 namespace MobileFueling.Api
@@ -73,12 +76,26 @@ namespace MobileFueling.Api
                     ValidAudience = Configuration["Jwt:Site"],
                     ValidIssuer = Configuration["Jwt:Site"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:SigningKey"])),
-                    ClockSkew = System.TimeSpan.Zero
+                    ClockSkew = TimeSpan.Zero
                 };
             });
 
             // Add framework services.
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            services.AddSwaggerGen(option =>
+            {
+                option.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "MobileFuelling API",
+                    Description = "Examples of MobileFuelling methods Web API"
+                });
+
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                option.IncludeXmlComments(xmlPath);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -111,6 +128,14 @@ namespace MobileFueling.Api
 
             app.UseAuthentication();
             app.UseHttpsRedirection();
+            
+
+            app.UseSwagger();
+            app.UseSwaggerUI(option =>
+            {
+                option.SwaggerEndpoint(Configuration["SwaggerOptions:UIEndpoint"], Configuration["SwaggerOptions:Description"]);
+                option.RoutePrefix = string.Empty;
+            });
             app.UseMvc();
         }
 

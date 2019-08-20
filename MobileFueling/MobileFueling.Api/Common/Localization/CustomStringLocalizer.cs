@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Extensions.Localization;
 
-namespace MobileFueling.Api.Common.BaseResponseResources
+namespace MobileFueling.Api.Common.Localization
 {
     public class CustomStringLocalizer : IStringLocalizer
     {
@@ -13,6 +13,7 @@ namespace MobileFueling.Api.Common.BaseResponseResources
         public const string USER_NOT_CREATED = nameof(USER_NOT_CREATED);
         public const string USERNAME_NOT_FOUND = nameof(USERNAME_NOT_FOUND);
         public const string USER_PASSWORD_WRONG = nameof(USER_PASSWORD_WRONG);
+        public const string USER_CAN_NOT_LOGIN = nameof(USER_CAN_NOT_LOGIN);
 
         public CustomStringLocalizer()
         {
@@ -20,13 +21,15 @@ namespace MobileFueling.Api.Common.BaseResponseResources
             {
                 {USER_NOT_CREATED, "User was not created" },
                 {USERNAME_NOT_FOUND, "User was not found by name" },
-                {USER_PASSWORD_WRONG, "User's is incorrect. Please check it and type again" }
+                {USER_PASSWORD_WRONG, "User's is incorrect. Please check it and type again" },
+                {USER_CAN_NOT_LOGIN, "User can not login system or has been banned" }
             };
             var ruDict = new Dictionary<string, string>
             {
                 {USER_NOT_CREATED, "Пользователь не был создан" },
                 {USERNAME_NOT_FOUND, "Пользователя с таким именем не существует" },
-                {USER_PASSWORD_WRONG, "Пароль введён некорректно, попробуйте заново" }
+                {USER_PASSWORD_WRONG, "Пароль введён некорректно, попробуйте заново" },
+                {USER_CAN_NOT_LOGIN, "Пользователь не имеет права входа в систему или заблокирован" }
             };
 
             _resources = new Dictionary<string, Dictionary<string, string>>

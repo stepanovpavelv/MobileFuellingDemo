@@ -10,5 +10,6 @@
         public const string FirstName = nameof(FirstName); // имя
         public const string MiddleName = nameof(MiddleName); // отчество
         public const string DateOfBirth = nameof(DateOfBirth); // дата рождения
+        public const string CanLogin = nameof(CanLogin); // статус пользователя (активен или заблокирован)
     }
 }
