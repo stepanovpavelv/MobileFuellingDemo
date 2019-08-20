@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
+using MobileFueling.Api.Common.HealthChecks;
 using MobileFueling.Api.Common.Localization;
 using MobileFueling.DB;
 using MobileFueling.Model;
@@ -39,7 +40,12 @@ namespace MobileFueling.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            SetFuelContextOptions(services);
+            var sqlType = SetFuelContextOptions(services);
+
+            // health checks
+            var healthConnectionString = Configuration["ConnectionStrings:HealthConnection"];
+            services.AddHealthChecks()
+                .AddCheck("Database App", new SqlConnectionHealthCheck(healthConnectionString, sqlType));
 
             // локализация
             services.AddTransient<IStringLocalizer, CustomStringLocalizer>();
@@ -111,6 +117,8 @@ namespace MobileFueling.Api
                 app.UseHsts();
             }
 
+            app.UseHealthChecks("/healthcheck");
+
             var supportedCultures = new[]
             {
                 new CultureInfo("ru"),
@@ -128,7 +136,6 @@ namespace MobileFueling.Api
 
             app.UseAuthentication();
             app.UseHttpsRedirection();
-            
 
             app.UseSwagger();
             app.UseSwaggerUI(option =>
@@ -139,7 +146,7 @@ namespace MobileFueling.Api
             app.UseMvc();
         }
 
-        private void SetFuelContextOptions(IServiceCollection services)
+        private int SetFuelContextOptions(IServiceCollection services)
         {
             var connectionStr = Configuration.GetConnectionString("DefaultConnection");
             var sqltype = Configuration.GetSection("appSettings").GetValue<int>("SQlType");
@@ -159,6 +166,8 @@ namespace MobileFueling.Api
                             options.UseSqlServer(connectionStr));
                     break;
             }
+
+            return sqltype;
         }
     }
 }
