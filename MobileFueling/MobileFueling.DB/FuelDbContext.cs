@@ -13,7 +13,9 @@ namespace MobileFueling.DB
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            MobileFuelingMobileBuilder.OnModelCreating(builder);
+            FuelMobileBuilder.OnModelCreating(builder);
         }
+
+        public DbSet<FuelType> FuelTypes { get; set; }
     }
 }

@@ -33,11 +33,6 @@ namespace MobileFueling.Api.ApiModels.User
             try
             {
                 var creationResult = await userManager.CreateAsync(applicationUser, viewModel.Password);
-                if (creationResult.Succeeded && viewModel.UserType == (short)UserType.Admin)
-                {
-                    await userManager.AddToRoleAsync(applicationUser, UserConstants.AdminRole).ConfigureAwait(false);
-                }
-
                 if (creationResult.Succeeded)
                 {
                     // save user's claims

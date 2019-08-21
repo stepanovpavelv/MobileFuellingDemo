@@ -8,10 +8,10 @@ using MobileFueling.Model;
 using MobileFueling.ViewModel;
 using System.Threading.Tasks;
 
-namespace MobileFueling.Api.Controllers
+namespace MobileFueling.Api.Controllers.v1
 {
     [Produces("application/json")]
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     public class AuthController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;

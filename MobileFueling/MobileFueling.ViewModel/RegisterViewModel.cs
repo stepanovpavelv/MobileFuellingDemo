@@ -25,7 +25,7 @@ namespace MobileFueling.ViewModel
         /// Тип пользователя
         /// </summary>
         [Required]
-        public UserTypeViewModel UserType { get; set; }
+        public UserTypeVM UserType { get; set; }
 
         /// <summary>
         /// Дата рождения

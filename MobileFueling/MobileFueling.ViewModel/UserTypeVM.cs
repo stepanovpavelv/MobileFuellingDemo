@@ -3,7 +3,7 @@
     /// <summary>
     /// Типы пользователей в системе
     /// </summary>
-    public enum UserTypeViewModel
+    public enum UserTypeVM
     {
         Admin = 0,
         Driver,

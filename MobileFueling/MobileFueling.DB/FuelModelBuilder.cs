@@ -3,30 +3,15 @@ using MobileFueling.Model;
 
 namespace MobileFueling.DB
 {
-    public static class MobileFuelingMobileBuilder
+    public static class FuelMobileBuilder
     {
         public static void OnModelCreating(ModelBuilder builder)
         {
-            // application roles
-            builder.Entity<ApplicationRole>().HasData(
-                new ApplicationRole { Id = 1, Name = "Admin", NormalizedName = "ADMIN" }
-            );
-
             // fuel types
             builder.Entity<FuelType>().ToTable("FuelTypes");
             builder.Entity<FuelType>().HasKey(x => x.Id);
             builder.Entity<FuelType>().Property(x => x.Name).HasMaxLength(50);
-
-            // predefined fuel types
-            builder.Entity<FuelType>().HasData(
-                new FuelType { Id = 1, Name = "АИ-80" },
-                new FuelType { Id = 2, Name = "АИ-92" },
-                new FuelType { Id = 3, Name = "АИ-95" },
-                new FuelType { Id = 4, Name = "АИ-98" },
-                new FuelType { Id = 5, Name = "Дизель" },
-                new FuelType { Id = 6, Name = "Газ" }
-            );
-
+            
             // users - clients
             builder.Entity<Client>().HasMany(x => x.Cars).WithOne(x => x.Client).HasForeignKey(x => x.ClientId);
 
