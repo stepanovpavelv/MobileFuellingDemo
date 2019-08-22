@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
 using MobileFueling.Api.Common.HealthChecks;
@@ -27,7 +26,6 @@ namespace MobileFueling.Api
     {
         private const string DEFAULT_REQUEST_CULTURE = "ru";
         private readonly IConfiguration _configuration;
-        private readonly IHostingEnvironment _env;
 
         public Startup(IHostingEnvironment env)
         {
@@ -38,7 +36,6 @@ namespace MobileFueling.Api
                 .AddEnvironmentVariables();
 
             _configuration = builder.Build();
-            _env = env;
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
