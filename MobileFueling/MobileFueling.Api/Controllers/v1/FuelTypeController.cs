@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using MobileFueling.Api.ApiModels.FuelType;
 using MobileFueling.DB;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace MobileFueling.Api.Controllers.v1
 {
+    [Authorize]
     [Produces("application/json")]
     [Route("api/v1/[controller]")]
     [ApiController]

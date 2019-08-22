@@ -7,6 +7,7 @@
     {
         Admin = 0,
         Driver,
-        Client
+        Client,
+        Manager
     }
 }

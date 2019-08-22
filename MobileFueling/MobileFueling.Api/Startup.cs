@@ -7,12 +7,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
 using MobileFueling.Api.Common.HealthChecks;
 using MobileFueling.Api.Common.Localization;
 using MobileFueling.DB;
 using MobileFueling.Model;
+using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.Globalization;
 using System.IO;
@@ -24,7 +26,8 @@ namespace MobileFueling.Api
     public class Startup
     {
         private const string DEFAULT_REQUEST_CULTURE = "ru";
-        public IConfiguration Configuration { get; }
+        private readonly IConfiguration _configuration;
+        private readonly IHostingEnvironment _env;
 
         public Startup(IHostingEnvironment env)
         {
@@ -34,7 +37,8 @@ namespace MobileFueling.Api
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
 
-            Configuration = builder.Build();
+            _configuration = builder.Build();
+            _env = env;
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -43,7 +47,7 @@ namespace MobileFueling.Api
             var sqlType = SetFuelContextOptions(services);
 
             // health checks
-            var healthConnectionString = Configuration["ConnectionStrings:HealthConnection"];
+            var healthConnectionString = _configuration["ConnectionStrings:HealthConnection"];
             services.AddHealthChecks()
                 .AddCheck("Database App", new SqlConnectionHealthCheck(healthConnectionString, sqlType));
 
@@ -79,9 +83,9 @@ namespace MobileFueling.Api
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
-                    ValidAudience = Configuration["Jwt:Site"],
-                    ValidIssuer = Configuration["Jwt:Site"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:SigningKey"])),
+                    ValidAudience = _configuration["Jwt:Site"],
+                    ValidIssuer = _configuration["Jwt:Site"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SigningKey"])),
                     ClockSkew = TimeSpan.Zero
                 };
             });
@@ -91,11 +95,19 @@ namespace MobileFueling.Api
 
             services.AddSwaggerGen(option =>
             {
-                option.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+                option.SwaggerDoc("v1", new Info
                 {
                     Version = "v1",
                     Title = "MobileFuelling API",
                     Description = "Examples of MobileFuelling methods Web API"
+                });
+
+                option.AddSecurityDefinition("Bearer", new ApiKeyScheme
+                {
+                    Type = "apiKey",
+                    Name = "Authorization",
+                    In = "header",
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\""
                 });
 
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -140,7 +152,7 @@ namespace MobileFueling.Api
             app.UseSwagger();
             app.UseSwaggerUI(option =>
             {
-                option.SwaggerEndpoint(Configuration["SwaggerOptions:UIEndpoint"], Configuration["SwaggerOptions:Description"]);
+                option.SwaggerEndpoint(_configuration["SwaggerOptions:UIEndpoint"], _configuration["SwaggerOptions:Description"]);
                 option.RoutePrefix = string.Empty;
             });
             app.UseMvc();
@@ -150,8 +162,8 @@ namespace MobileFueling.Api
 
         private int SetFuelContextOptions(IServiceCollection services)
         {
-            var connectionStr = Configuration.GetConnectionString("DefaultConnection");
-            var sqltype = Configuration.GetSection("appSettings").GetValue<int>("SQlType");
+            var connectionStr = _configuration.GetConnectionString("DefaultConnection");
+            var sqltype = _configuration.GetSection("appSettings").GetValue<int>("SQlType");
 
             switch (sqltype)
             {
