@@ -38,7 +38,7 @@ namespace MobileFueling.Api.Controllers.v1
         /// </summary>
         /// <param name="id">Идентификатор типа топлива</param>
         /// <returns>Тип топлива</returns>
-        [HttpGet("{id}", Name = "Get")]
+        [HttpGet("{id}", Name = "GetFuelType")]
         [ProducesResponseType(200)]
         public async Task<FuelTypeVM> Get(long id)
         {

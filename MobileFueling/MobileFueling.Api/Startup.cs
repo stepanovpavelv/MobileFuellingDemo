@@ -24,6 +24,7 @@ namespace MobileFueling.Api
 {
     public class Startup
     {
+        private const string DEFAULT_VERSION = "v1";
         private const string DEFAULT_REQUEST_CULTURE = "ru";
         private readonly IConfiguration _configuration;
 
@@ -92,9 +93,9 @@ namespace MobileFueling.Api
 
             services.AddSwaggerGen(option =>
             {
-                option.SwaggerDoc("v1", new Info
+                option.SwaggerDoc(DEFAULT_VERSION, new Info
                 {
-                    Version = "v1",
+                    Version = DEFAULT_VERSION,
                     Title = "MobileFuelling API",
                     Description = "Examples of MobileFuelling methods Web API"
                 });
@@ -152,7 +153,14 @@ namespace MobileFueling.Api
                 option.SwaggerEndpoint(_configuration["SwaggerOptions:UIEndpoint"], _configuration["SwaggerOptions:Description"]);
                 option.RoutePrefix = string.Empty;
             });
-            app.UseMvc();
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute("defaultapi", string.Concat("api/", DEFAULT_VERSION,"/{controller=Home}/{action=Index}/{id?}"));
+
+                routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
+
+                routes.MapRoute("userTypeRoute", string.Concat("api/", DEFAULT_VERSION, "/user/{userType}"));
+            });
 
             FuelInitializer.InitializePredefinedData(context);
         }

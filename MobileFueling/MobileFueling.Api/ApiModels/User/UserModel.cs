@@ -27,6 +27,7 @@ namespace MobileFueling.Api.ApiModels.User
             _stringLocalizer = stringLocalizer;
         }
 
+        #region AuthController methods
         internal async Task<RegisterResponse> SaveUserAccountAsync(UserManager<ApplicationUser> userManager, ApplicationUser applicationUser, RegisterViewModel viewModel)
         {
             var response = new RegisterResponse();
@@ -131,5 +132,10 @@ namespace MobileFueling.Api.ApiModels.User
             var allUserClaims = await userManager.GetClaimsAsync(applicationUser).ConfigureAwait(false);
             return allUserClaims.FirstOrDefault(x => x.Type == claimName);
         }
+        #endregion
+
+        #region UserController methods
+
+        #endregion
     }
 }
