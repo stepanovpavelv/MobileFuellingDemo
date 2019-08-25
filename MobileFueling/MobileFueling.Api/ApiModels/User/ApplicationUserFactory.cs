@@ -15,7 +15,7 @@ namespace MobileFueling.Api.ApiModels
             switch (userType)
             {
                 case UserType.Admin:
-                    user = CreateDefaultApplicationUser<ApplicationUser>(viewModel);
+                    user = CreateDefaultApplicationUser<SystemAdmin>(viewModel);
                     break;
                 case UserType.Client:
                     user = CreateDefaultApplicationUser<Client>(viewModel);
@@ -23,6 +23,9 @@ namespace MobileFueling.Api.ApiModels
                     break;
                 case UserType.Driver:
                     user = CreateDefaultApplicationUser<Driver>(viewModel);
+                    break;
+                case UserType.Manager:
+                    user = CreateDefaultApplicationUser<Manager>(viewModel);
                     break;
             }
 

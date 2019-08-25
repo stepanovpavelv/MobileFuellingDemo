@@ -15,6 +15,7 @@ using MobileFueling.DB;
 using MobileFueling.Model;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -100,6 +101,10 @@ namespace MobileFueling.Api
                     Description = "Examples of MobileFuelling methods Web API"
                 });
 
+                var security = new Dictionary<string, IEnumerable<string>>
+                {
+                    {"Bearer", new string[] { } }
+                };
                 option.AddSecurityDefinition("Bearer", new ApiKeyScheme
                 {
                     Type = "apiKey",
@@ -107,6 +112,10 @@ namespace MobileFueling.Api
                     In = "header",
                     Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\""
                 });
+
+                option.AddSecurityRequirement(security);
+
+                option.DescribeAllEnumsAsStrings();
 
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
@@ -155,7 +164,7 @@ namespace MobileFueling.Api
             });
             app.UseMvc(routes =>
             {
-                routes.MapRoute("defaultapi", string.Concat("api/", DEFAULT_VERSION,"/{controller=Home}/{action=Index}/{id?}"));
+                routes.MapRoute("defaultapi", string.Concat("api/", DEFAULT_VERSION, "/{controller=Home}/{action=Index}/{id?}"));
 
                 routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
 

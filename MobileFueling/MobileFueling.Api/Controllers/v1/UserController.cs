@@ -1,5 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
+using MobileFueling.Api.ApiModels.User;
+using MobileFueling.DB;
+using MobileFueling.Model;
 using MobileFueling.ViewModel;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,6 +19,15 @@ namespace MobileFueling.Api.Controllers.v1
     [ApiController]
     public class UserController : ControllerBase
     {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserModel _userModel;
+
+        public UserController(UserManager<ApplicationUser> userManager, FuelDbContext fuelContext, IStringLocalizer stringLocalizer)
+        {
+            _userManager = userManager;
+            _userModel = new UserModel(stringLocalizer, fuelContext);
+        }
+
         /// <summary>
         /// Получение списка пользователей
         /// </summary>
@@ -23,7 +37,8 @@ namespace MobileFueling.Api.Controllers.v1
         [ProducesResponseType(401)]
         public async Task<IEnumerable<ApplicationUserVM>> Get(UserTypeVM userType)
         {
-            return null;
+            var currentUser = await _userManager.GetUserAsync(User);
+            return await _userModel.GetAll(_userManager, currentUser, userType);
         }
 
         /// <summary>
@@ -42,7 +57,6 @@ namespace MobileFueling.Api.Controllers.v1
         /// <summary>
         /// Изменение информации по пользователю
         /// </summary>
-        /// <param name="id">Идентификатор пользователя</param>
         /// <param name="value">Информация по пользователю</param>
         [HttpPost]
         [ProducesResponseType(200)]

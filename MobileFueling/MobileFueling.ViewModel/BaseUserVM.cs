@@ -16,6 +16,7 @@ namespace MobileFueling.ViewModel
         /// Пароль
         /// </summary>
         [Required]
+        [StringLength(100, MinimumLength = 5)]
         public string Password { get; set; }
 
         /// <summary>

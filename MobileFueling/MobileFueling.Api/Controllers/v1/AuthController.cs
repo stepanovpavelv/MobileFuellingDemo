@@ -38,8 +38,11 @@ namespace MobileFueling.Api.Controllers.v1
         [HttpPost]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult> AddUser([FromBody] RegisterViewModel viewModel)
+        public async Task<IActionResult> AddUser([FromBody] RegisterViewModel viewModel)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var applicationUser = ApplicationUserFactory.CreateApplicationUser(viewModel);
             return Ok(await _userModel.SaveUserAccountAsync(_userManager, applicationUser, viewModel));
         }
@@ -55,8 +58,11 @@ namespace MobileFueling.Api.Controllers.v1
         [HttpPost]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult> GetUser([FromBody] LoginViewModel viewModel)
+        public async Task<IActionResult> GetUser([FromBody] LoginViewModel viewModel)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             return Ok(await _userModel.GetUserAsync(_userManager, _configuration, viewModel));
         }
     }
