@@ -44,14 +44,16 @@ namespace MobileFueling.Api.Controllers.v1
         /// <summary>
         /// Получение информации по пользователю
         /// </summary>
+        /// <param name="userType"></param>
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("{id}", Name = "GetUser")]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
-        public async Task<ApplicationUserVM> Get(long id)
+        public async Task<ApplicationUserVM> Get(UserTypeVM userType, long id)
         {
-            return new ApplicationUserVM();
+            var currentUser = await _userManager.GetUserAsync(User);
+            return await _userModel.GetOne(_userManager, currentUser, userType, id);
         }
 
         /// <summary>

@@ -209,6 +209,62 @@ namespace MobileFueling.Api.ApiModels.User
             throw new NotImplementedException("Not implemented user type");
         }
 
+        public async Task<ApplicationUserVM> GetOne(UserManager<ApplicationUser> userManager, ApplicationUser currentUser, UserTypeVM userType, long id)
+        {
+            var applicationUserType = GetApplicationUserType(currentUser);
+
+            ApplicationUser item = null;
+            switch (userType)
+            {
+                case UserTypeVM.Admin:
+                    if (applicationUserType == UserType.Admin)
+                    {
+                        item = await _fuelContext.AdminUsers.FirstOrDefaultAsync(x => x.Id == id);
+                    }
+                    else
+                    {
+                        throw new AccessViolationException(_stringLocalizer[CustomStringLocalizer.NO_RIGTHS_TO_RECEIVE_USERLIST]);
+                    }
+                    break;
+                case UserTypeVM.Client:
+                    if (applicationUserType == UserType.Admin || applicationUserType == UserType.Manager)
+                    {
+                        item = await _fuelContext.ClientUsers.FirstOrDefaultAsync(x => x.Id == id);
+                    }
+                    else
+                    {
+                        throw new AccessViolationException(_stringLocalizer[CustomStringLocalizer.NO_RIGTHS_TO_RECEIVE_USERLIST]);
+                    }
+                    break;
+                case UserTypeVM.Driver:
+                    if (applicationUserType == UserType.Admin || applicationUserType == UserType.Manager)
+                    {
+                        item = await _fuelContext.DriverUsers.FirstOrDefaultAsync(x => x.Id == id);
+                    }
+                    else
+                    {
+                        throw new AccessViolationException(_stringLocalizer[CustomStringLocalizer.NO_RIGTHS_TO_RECEIVE_USERLIST]);
+                    }
+                    break;
+                case UserTypeVM.Manager:
+                    if (applicationUserType == UserType.Admin)
+                    {
+                        item = await _fuelContext.ManagerUsers.FirstOrDefaultAsync(x => x.Id == id);
+                    }
+                    else
+                    {
+                        throw new AccessViolationException(_stringLocalizer[CustomStringLocalizer.NO_RIGTHS_TO_RECEIVE_USERLIST]);
+                    }
+                    break;
+            }
+
+            if (item != null)
+            {
+                return await Convert(userManager, item);
+            }
+            throw new NotImplementedException("Not implemented user type");
+        }
+
         private UserType GetApplicationUserType(ApplicationUser applicationUser)
         {
             if (applicationUser is Driver)
