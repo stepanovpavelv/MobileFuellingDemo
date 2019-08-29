@@ -366,7 +366,7 @@ namespace MobileFueling.Api.ApiModels.User
 
             await UpdateUserClaimAsync(userManager, applicationUser, UserConstants.CanLogin, applicationUserVM.CanLogin ? "1" : "0").ConfigureAwait(false);
 
-            await UpdateUserClaimAsync(userManager, applicationUser, UserConstants.DateOfBirth, applicationUserVM.DateOfBirth?.ToString("dd.MM.yyyy")).ConfigureAwait(false);
+            await UpdateUserClaimAsync(userManager, applicationUser, UserConstants.DateOfBirth, applicationUserVM.DateOfBirth?.ToString(dateFormat)).ConfigureAwait(false);
         }
 
         private async Task UpdateUserClaimAsync(UserManager<ApplicationUser> userManager, ApplicationUser applicationUser, string type, string value)
