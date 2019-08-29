@@ -1,7 +1,11 @@
-﻿using MobileFueling.Model;
+﻿using Microsoft.EntityFrameworkCore;
+using MobileFueling.DB;
+using MobileFueling.Model;
 using MobileFueling.Model.Enums;
 using MobileFueling.ViewModel;
 using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace MobileFueling.Api.ApiModels
 {
@@ -30,6 +34,23 @@ namespace MobileFueling.Api.ApiModels
             }
 
             return user;
+        }
+
+        public async static Task<ApplicationUser> GetApplicationUserAsync(FuelDbContext context, UserTypeVM userTypeVM, long id)
+        {
+            switch (userTypeVM)
+            {
+                case UserTypeVM.Admin:
+                    return await context.AdminUsers.FirstOrDefaultAsync(x => x.Id == id);
+                case UserTypeVM.Client:
+                    return await context.ClientUsers.FirstOrDefaultAsync(x => x.Id == id);
+                case UserTypeVM.Driver:
+                    return await context.DriverUsers.FirstOrDefaultAsync(x => x.Id == id);
+                case UserTypeVM.Manager:
+                    return await context.ManagerUsers.FirstOrDefaultAsync(x => x.Id == id);
+            }
+
+            return null;
         }
 
         private static ApplicationUser CreateDefaultApplicationUser<T>(RegisterViewModel viewModel) where T: ApplicationUser, new()

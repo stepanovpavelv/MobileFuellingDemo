@@ -8,7 +8,7 @@
         /// <summary>
         /// Идентификатор пользователя
         /// </summary>
-        public long Id { get; set; }
+        public long? Id { get; set; }
 
         /// <summary>
         /// Метка права входа в систему

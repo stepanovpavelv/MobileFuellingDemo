@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using MobileFueling.Api.ApiModels.User;
+using MobileFueling.Api.Contract.UserData;
 using MobileFueling.DB;
 using MobileFueling.Model;
 using MobileFueling.ViewModel;
@@ -35,7 +36,7 @@ namespace MobileFueling.Api.Controllers.v1
         [HttpGet]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
-        public async Task<IEnumerable<ApplicationUserVM>> Get(UserTypeVM userType)
+        public async Task<UserGetAllResponse> Get(UserTypeVM userType)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             return await _userModel.GetAll(_userManager, currentUser, userType);
@@ -44,13 +45,13 @@ namespace MobileFueling.Api.Controllers.v1
         /// <summary>
         /// Получение информации по пользователю
         /// </summary>
-        /// <param name="userType"></param>
-        /// <param name="id"></param>
+        /// <param name="userType">Тип пользователя</param>
+        /// <param name="id">Идентификатор пользователя</param>
         /// <returns></returns>
         [HttpGet("{id}", Name = "GetUser")]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
-        public async Task<ApplicationUserVM> Get(UserTypeVM userType, long id)
+        public async Task<UserGetOneResponse> Get(UserTypeVM userType, long id)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             return await _userModel.GetOne(_userManager, currentUser, userType, id);
@@ -59,23 +60,31 @@ namespace MobileFueling.Api.Controllers.v1
         /// <summary>
         /// Изменение информации по пользователю
         /// </summary>
+        /// <param name="userType">Тип пользователя</param>
         /// <param name="value">Информация по пользователю</param>
+        /// <returns></returns>
         [HttpPost]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
-        public async Task Post([FromBody] ApplicationUserVM value)
+        public async Task<UserUpdateResponse> Post(UserTypeVM userType, [FromBody] ApplicationUserVM value)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            return await _userModel.PostOne(_userManager, currentUser, userType, value);
         }
 
         /// <summary>
         /// Удаление пользователя
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="userType">Тип пользователя</param>
+        /// <param name="id">Идентификатор пользователя</param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
-        public async Task Delete(long id)
+        public async Task<UserDeleteResponse> Delete(UserTypeVM userType, long id)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            return await _userModel.DeleteOne(_userManager, currentUser, userType, id);
         }
     }
 }

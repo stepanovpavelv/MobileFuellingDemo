@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using MobileFueling.Api.Common.BaseResponseResources;
 using MobileFueling.Api.Common.Localization;
 using MobileFueling.Api.Contract;
+using MobileFueling.Api.Contract.UserData;
 using MobileFueling.DB;
 using MobileFueling.Model;
 using MobileFueling.Model.Enums;
@@ -123,7 +124,7 @@ namespace MobileFueling.Api.ApiModels.User
 
             return response;
         }
-
+        
         private async Task AddUserClaimsAsync(UserManager<ApplicationUser> userManager, ApplicationUser applicationUser, RegisterViewModel viewModel)
         {
             var userClaims = new List<Claim>
@@ -153,8 +154,10 @@ namespace MobileFueling.Api.ApiModels.User
         #endregion
 
         #region UserController methods
-        public async Task<IEnumerable<ApplicationUserVM>> GetAll(UserManager<ApplicationUser> userManager, ApplicationUser currentUser, UserTypeVM userType)
+        public async Task<UserGetAllResponse> GetAll(UserManager<ApplicationUser> userManager, ApplicationUser currentUser, UserTypeVM userType)
         {
+            var response = new UserGetAllResponse();
+
             var applicationUserType = GetApplicationUserType(currentUser);
 
             Func<IEnumerable<ApplicationUser>, Task<IEnumerable<ApplicationUserVM>>> convertFunc = async (items) =>
@@ -169,48 +172,53 @@ namespace MobileFueling.Api.ApiModels.User
                     if (applicationUserType == UserType.Admin)
                     {
                         var items = await _fuelContext.AdminUsers.ToListAsync();
-                        return await convertFunc(items);
+                        response.Items = await convertFunc(items);
                     }
                     else
                     {
-                        throw new AccessViolationException(_stringLocalizer[CustomStringLocalizer.NO_RIGTHS_TO_RECEIVE_USERLIST]);
+                        response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USERLIST]);
                     }
+                    return response;
                 case UserTypeVM.Client:
                     if (applicationUserType == UserType.Admin || applicationUserType == UserType.Manager)
                     {
                         var items = await _fuelContext.ClientUsers.ToListAsync();
-                        return await convertFunc(items);
+                        response.Items = await convertFunc(items);
                     }
                     else
                     {
-                        throw new AccessViolationException(_stringLocalizer[CustomStringLocalizer.NO_RIGTHS_TO_RECEIVE_USERLIST]);
+                        response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USERLIST]);
                     }
+                    return response;
                 case UserTypeVM.Driver:
                     if (applicationUserType == UserType.Admin || applicationUserType == UserType.Manager)
                     {
                         var items = await _fuelContext.DriverUsers.ToListAsync();
-                        return await convertFunc(items);
+                        response.Items = await convertFunc(items);
                     }
                     else
                     {
-                        throw new AccessViolationException(_stringLocalizer[CustomStringLocalizer.NO_RIGTHS_TO_RECEIVE_USERLIST]);
+                        response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USERLIST]);
                     }
+                    return response;
                 case UserTypeVM.Manager:
                     if (applicationUserType == UserType.Admin)
                     {
                         var items = await _fuelContext.ManagerUsers.ToListAsync();
-                        return await convertFunc(items);
+                        response.Items = await convertFunc(items);
                     }
                     else
                     {
-                        throw new AccessViolationException(_stringLocalizer[CustomStringLocalizer.NO_RIGTHS_TO_RECEIVE_USERLIST]);
+                        response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USERLIST]);
                     }
+                    return response;
             }
             throw new NotImplementedException("Not implemented user type");
         }
 
-        public async Task<ApplicationUserVM> GetOne(UserManager<ApplicationUser> userManager, ApplicationUser currentUser, UserTypeVM userType, long id)
+        public async Task<UserGetOneResponse> GetOne(UserManager<ApplicationUser> userManager, ApplicationUser currentUser, UserTypeVM userType, long id)
         {
+            var response = new UserGetOneResponse();
             var applicationUserType = GetApplicationUserType(currentUser);
 
             ApplicationUser item = null;
@@ -223,7 +231,8 @@ namespace MobileFueling.Api.ApiModels.User
                     }
                     else
                     {
-                        throw new AccessViolationException(_stringLocalizer[CustomStringLocalizer.NO_RIGTHS_TO_RECEIVE_USERLIST]);
+                        response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USER]);
+                        return response;
                     }
                     break;
                 case UserTypeVM.Client:
@@ -233,7 +242,8 @@ namespace MobileFueling.Api.ApiModels.User
                     }
                     else
                     {
-                        throw new AccessViolationException(_stringLocalizer[CustomStringLocalizer.NO_RIGTHS_TO_RECEIVE_USERLIST]);
+                        response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USER]);
+                        return response;
                     }
                     break;
                 case UserTypeVM.Driver:
@@ -243,7 +253,8 @@ namespace MobileFueling.Api.ApiModels.User
                     }
                     else
                     {
-                        throw new AccessViolationException(_stringLocalizer[CustomStringLocalizer.NO_RIGTHS_TO_RECEIVE_USERLIST]);
+                        response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USER]);
+                        return response;
                     }
                     break;
                 case UserTypeVM.Manager:
@@ -253,16 +264,132 @@ namespace MobileFueling.Api.ApiModels.User
                     }
                     else
                     {
-                        throw new AccessViolationException(_stringLocalizer[CustomStringLocalizer.NO_RIGTHS_TO_RECEIVE_USERLIST]);
+                        response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USER]);
+                        return response;
                     }
                     break;
             }
 
             if (item != null)
             {
-                return await Convert(userManager, item);
+                response.Item = await Convert(userManager, item);
             }
-            throw new NotImplementedException("Not implemented user type");
+            else
+            {
+                response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.USER_NOT_FOUND]);
+            }
+
+            return response;
+        }
+
+        public async Task<UserUpdateResponse> PostOne(UserManager<ApplicationUser> userManager, ApplicationUser currentUser, UserTypeVM userType, ApplicationUserVM applicationUserVM)
+        {
+            var response = new UserUpdateResponse();
+            var applicationUserType = GetApplicationUserType(currentUser);
+
+            if (applicationUserType != UserType.Admin && applicationUserType != UserType.Manager) // редактировать может только админ или менеджер
+            {
+                response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_ADD_OR_UPDATE_USER]);
+                return response;
+            }
+
+            if (applicationUserType == UserType.Manager && userType == UserTypeVM.Admin) // менеджер хочет редактировать админа
+            {
+                response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_ADD_OR_UPDATE_USER]);
+                return response;
+            }
+
+            ApplicationUser applicationUserValue = null;
+            if (applicationUserVM.Id.HasValue)
+            {
+                applicationUserValue = await ApplicationUserFactory.GetApplicationUserAsync(_fuelContext, userType, applicationUserVM.Id.Value);
+            }
+
+            if (applicationUserValue == null)
+            {
+                response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.USER_NOT_FOUND]);
+                return response;
+            }
+
+            applicationUserValue.Email = applicationUserVM.Email;
+            applicationUserValue.UserName = applicationUserVM.Email;
+
+            var result = await userManager.UpdateAsync(applicationUserValue);
+            if (!result.Succeeded)
+            {
+                response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.USER_NOT_FOUND]);
+                return response;
+            }
+
+            await UpdateUserClaimsAsync(userManager, applicationUserVM, applicationUserValue).ConfigureAwait(false);
+
+            response.Id = applicationUserValue.Id;
+            return response;
+        }
+
+        public async Task<UserDeleteResponse> DeleteOne(UserManager<ApplicationUser> userManager, ApplicationUser currentUser, UserTypeVM userType, long id)
+        {
+            var response = new UserDeleteResponse();
+            var applicationUserType = GetApplicationUserType(currentUser);
+
+            if (applicationUserType != UserType.Admin && applicationUserType != UserType.Manager) // удалить может только админ или менеджер
+            {
+                response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_DELETE_USER]);
+                return response;
+            }
+
+            if (applicationUserType == UserType.Manager && userType == UserTypeVM.Admin) // менеджер хочет удалить админа
+            {
+                response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_DELETE_USER]);
+                return response;
+            }
+
+            var applicationUserValue = await ApplicationUserFactory.GetApplicationUserAsync(_fuelContext, userType, id);
+            if (applicationUserValue == null)
+            {
+                response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.USER_NOT_FOUND]);
+                return response;
+            }
+
+            var result = await userManager.DeleteAsync(applicationUserValue);
+            response.IsSuccess = result.Succeeded;
+            return response;
+        }
+
+        private async Task UpdateUserClaimsAsync(UserManager<ApplicationUser> userManager, ApplicationUserVM applicationUserVM, ApplicationUser applicationUser)
+        {
+            await UpdateUserClaimAsync(userManager, applicationUser, UserConstants.Name, applicationUserVM.Name).ConfigureAwait(false);
+
+            await UpdateUserClaimAsync(userManager, applicationUser, UserConstants.FirstName, applicationUserVM.FirstName).ConfigureAwait(false);
+
+            await UpdateUserClaimAsync(userManager, applicationUser, UserConstants.MiddleName, applicationUserVM.MiddleName).ConfigureAwait(false);
+
+            await UpdateUserClaimAsync(userManager, applicationUser, UserConstants.CanLogin, applicationUserVM.CanLogin ? "1" : "0").ConfigureAwait(false);
+
+            await UpdateUserClaimAsync(userManager, applicationUser, UserConstants.DateOfBirth, applicationUserVM.DateOfBirth?.ToString("dd.MM.yyyy")).ConfigureAwait(false);
+        }
+
+        private async Task UpdateUserClaimAsync(UserManager<ApplicationUser> userManager, ApplicationUser applicationUser, string type, string value)
+        {
+            var claim = await GetUserClaimAsync(userManager, applicationUser, type);
+            if (claim != null && claim.Value != value)
+            {
+                await ReplaceUserClaimAsync(userManager, applicationUser, claim, new Claim(type, value));
+            }
+            else
+            {
+                await AddUserClaimAsync(userManager, applicationUser, new Claim(type, value));
+            }
+        }
+
+        private async Task AddUserClaimAsync(UserManager<ApplicationUser> userManager, ApplicationUser applicationUser, Claim claim)
+        {
+            await userManager.AddClaimAsync(applicationUser, claim).ConfigureAwait(false);
+        }
+
+        private async Task ReplaceUserClaimAsync(UserManager<ApplicationUser> userManager, ApplicationUser applicationUser, Claim oldClaim, Claim newClaim)
+        {
+            await userManager.ReplaceClaimAsync(applicationUser, oldClaim, newClaim).ConfigureAwait(false);
         }
 
         private UserType GetApplicationUserType(ApplicationUser applicationUser)

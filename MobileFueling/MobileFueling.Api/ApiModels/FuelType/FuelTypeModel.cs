@@ -1,10 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using MobileFueling.Api.Common.Localization;
+using MobileFueling.Api.Contract.FuelType;
 using MobileFueling.DB;
 using MobileFueling.ViewModel;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,22 +20,31 @@ namespace MobileFueling.Api.ApiModels.FuelType
             _stringLocalizer = stringLocalizer;
         }
 
-        public async Task<IEnumerable<FuelTypeVM>> GetAll()
+        public async Task<FuelTypeGetAllResponse> GetAll()
         {
             var items = await _fuelContext.FuelTypes.ToListAsync();
-            return items.Select(Convert);
+            return new FuelTypeGetAllResponse
+            {
+                Items = items.Select(Convert)
+            };
         }
 
-        public async Task<FuelTypeVM> GetOne(long id)
+        public async Task<FuelTypeGetOneResponse> GetOne(long id)
         {
+            FuelTypeGetOneResponse response = new FuelTypeGetOneResponse();
+
             var item = await _fuelContext.FuelTypes.FirstOrDefaultAsync(x => x.Id == id);
             if (item == null)
-                throw new ArgumentException(_stringLocalizer[CustomStringLocalizer.FUEL_TYPE_CAN_NOT_FIND]);
+            {
+                response.AddMessage(Common.BaseResponseResources.MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.FUEL_TYPE_CAN_NOT_FIND]);
+                return response;
+            }
 
-            return Convert(item);
+            response.Item = Convert(item);
+            return response;
         }
 
-        public async Task<long> PostOne(FuelTypeVM fuelTypeVM)
+        public async Task<FuelTypeUpdateResponse> PostOne(FuelTypeVM fuelTypeVM)
         {
             Model.FuelType fuelType = null;
             if (fuelTypeVM.Id.HasValue)
@@ -52,17 +60,29 @@ namespace MobileFueling.Api.ApiModels.FuelType
                 await _fuelContext.FuelTypes.AddAsync(fuelType);
 
             _fuelContext.SaveChanges();
-            return fuelType.Id;
+
+            return new FuelTypeUpdateResponse
+            {
+                Id = fuelType.Id
+            };
         }
 
-        public async Task DeleteOne(long id)
+        public async Task<FuelTypeDeleteResponse> DeleteOne(long id)
         {
+            FuelTypeDeleteResponse response = new FuelTypeDeleteResponse { IsSuccess = false };
+
             var item = await _fuelContext.FuelTypes.FirstOrDefaultAsync(x => x.Id == id);
             if (item == null)
-                throw new ArgumentException(_stringLocalizer[CustomStringLocalizer.FUEL_TYPE_CAN_NOT_FIND]);
+            {
+                response.AddMessage(Common.BaseResponseResources.MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.FUEL_TYPE_CAN_NOT_FIND]);
+                return response;
+            }
 
             _fuelContext.FuelTypes.Remove(item);
             await _fuelContext.SaveChangesAsync();
+
+            response.IsSuccess = true;
+            return response;
         }
 
         private FuelTypeVM Convert(Model.FuelType fuelType)
