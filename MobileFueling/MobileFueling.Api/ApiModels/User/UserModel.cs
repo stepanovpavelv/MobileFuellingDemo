@@ -168,52 +168,39 @@ namespace MobileFueling.Api.ApiModels.User
 
             switch (userType)
             {
-                case UserTypeVM.Admin:
-                    if (applicationUserType == UserType.Admin)
-                    {
-                        var items = await _fuelContext.AdminUsers.ToListAsync();
-                        response.Items = await convertFunc(items);
-                    }
-                    else
-                    {
-                        response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USERLIST]);
-                    }
-                    return response;
-                case UserTypeVM.Client:
-                    if (applicationUserType == UserType.Admin || applicationUserType == UserType.Manager)
-                    {
-                        var items = await _fuelContext.ClientUsers.ToListAsync();
-                        response.Items = await convertFunc(items);
-                    }
-                    else
-                    {
-                        response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USERLIST]);
-                    }
-                    return response;
-                case UserTypeVM.Driver:
-                    if (applicationUserType == UserType.Admin || applicationUserType == UserType.Manager)
-                    {
-                        var items = await _fuelContext.DriverUsers.ToListAsync();
-                        response.Items = await convertFunc(items);
-                    }
-                    else
-                    {
-                        response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USERLIST]);
-                    }
-                    return response;
-                case UserTypeVM.Manager:
-                    if (applicationUserType == UserType.Admin)
-                    {
-                        var items = await _fuelContext.ManagerUsers.ToListAsync();
-                        response.Items = await convertFunc(items);
-                    }
-                    else
-                    {
-                        response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USERLIST]);
-                    }
-                    return response;
+                case UserTypeVM.Admin when applicationUserType == UserType.Admin:
+                    var admins = await _fuelContext.AdminUsers.ToListAsync();
+                    response.Items = await convertFunc(admins);
+                    break;
+                case UserTypeVM.Admin when applicationUserType != UserType.Admin:
+                    response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USERLIST]);
+                    break;
+                case UserTypeVM.Client when applicationUserType == UserType.Admin || applicationUserType == UserType.Manager:
+                    var clients = await _fuelContext.ClientUsers.ToListAsync();
+                    response.Items = await convertFunc(clients);
+                    break;
+                case UserTypeVM.Client when applicationUserType != UserType.Admin && applicationUserType != UserType.Manager:
+                    response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USERLIST]);
+                    break;
+                case UserTypeVM.Driver when applicationUserType == UserType.Admin || applicationUserType == UserType.Manager:
+                    var drivers = await _fuelContext.DriverUsers.ToListAsync();
+                    response.Items = await convertFunc(drivers);
+                    break;
+                case UserTypeVM.Driver when applicationUserType != UserType.Admin && applicationUserType != UserType.Manager:
+                    response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USERLIST]);
+                    break;
+                case UserTypeVM.Manager when applicationUserType == UserType.Admin:
+                    var managers = await _fuelContext.ManagerUsers.ToListAsync();
+                    response.Items = await convertFunc(managers);
+                    break;
+                case UserTypeVM.Manager when applicationUserType != UserType.Admin:
+                    response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USERLIST]);
+                    break;
+                default:
+                    throw new NotImplementedException("Not implemented user type");
             }
-            throw new NotImplementedException("Not implemented user type");
+
+            return response;
         }
 
         public async Task<UserGetOneResponse> GetOne(UserManager<ApplicationUser> userManager, ApplicationUser currentUser, UserTypeVM userType, long id)
@@ -224,57 +211,39 @@ namespace MobileFueling.Api.ApiModels.User
             ApplicationUser item = null;
             switch (userType)
             {
-                case UserTypeVM.Admin:
-                    if (applicationUserType == UserType.Admin)
-                    {
-                        item = await _fuelContext.AdminUsers.FirstOrDefaultAsync(x => x.Id == id);
-                    }
-                    else
-                    {
-                        response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USER]);
-                        return response;
-                    }
+                case UserTypeVM.Admin when applicationUserType == UserType.Admin:
+                    item = await _fuelContext.AdminUsers.FirstOrDefaultAsync(x => x.Id == id);
                     break;
-                case UserTypeVM.Client:
-                    if (applicationUserType == UserType.Admin || applicationUserType == UserType.Manager)
-                    {
-                        item = await _fuelContext.ClientUsers.FirstOrDefaultAsync(x => x.Id == id);
-                    }
-                    else
-                    {
-                        response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USER]);
-                        return response;
-                    }
+                case UserTypeVM.Admin when applicationUserType != UserType.Admin:
+                    response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USER]);
                     break;
-                case UserTypeVM.Driver:
-                    if (applicationUserType == UserType.Admin || applicationUserType == UserType.Manager)
-                    {
-                        item = await _fuelContext.DriverUsers.FirstOrDefaultAsync(x => x.Id == id);
-                    }
-                    else
-                    {
-                        response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USER]);
-                        return response;
-                    }
+                case UserTypeVM.Client when applicationUserType == UserType.Admin || applicationUserType == UserType.Manager:
+                    item = await _fuelContext.ClientUsers.FirstOrDefaultAsync(x => x.Id == id);
                     break;
-                case UserTypeVM.Manager:
-                    if (applicationUserType == UserType.Admin)
-                    {
-                        item = await _fuelContext.ManagerUsers.FirstOrDefaultAsync(x => x.Id == id);
-                    }
-                    else
-                    {
-                        response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USER]);
-                        return response;
-                    }
+                case UserTypeVM.Client when applicationUserType != UserType.Admin && applicationUserType != UserType.Manager:
+                    response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USER]);
                     break;
+                case UserTypeVM.Driver when applicationUserType == UserType.Admin || applicationUserType == UserType.Manager:
+                    item = await _fuelContext.DriverUsers.FirstOrDefaultAsync(x => x.Id == id);
+                    break;
+                case UserTypeVM.Driver when applicationUserType != UserType.Admin && applicationUserType != UserType.Manager:
+                    response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USER]);
+                    break;
+                case UserTypeVM.Manager when applicationUserType == UserType.Admin:
+                    item = await _fuelContext.ManagerUsers.FirstOrDefaultAsync(x => x.Id == id);
+                    break;
+                case UserTypeVM.Manager when applicationUserType != UserType.Admin:
+                    response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USER]);
+                    break;
+                default:
+                    throw new NotImplementedException("Not implemented user type");
             }
 
             if (item != null)
             {
                 response.Item = await Convert(userManager, item);
             }
-            else
+            else if(!response.HasError())
             {
                 response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.USER_NOT_FOUND]);
             }
