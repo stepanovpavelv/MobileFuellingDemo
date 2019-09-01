@@ -7,7 +7,6 @@ using MobileFueling.Api.Contract.UserData;
 using MobileFueling.DB;
 using MobileFueling.Model;
 using MobileFueling.ViewModel;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace MobileFueling.Api.Controllers.v1
@@ -26,20 +25,20 @@ namespace MobileFueling.Api.Controllers.v1
         public UserController(UserManager<ApplicationUser> userManager, FuelDbContext fuelContext, IStringLocalizer stringLocalizer)
         {
             _userManager = userManager;
-            _userModel = new UserModel(stringLocalizer, fuelContext);
+            _userModel = new UserModel(stringLocalizer, userManager, fuelContext);
         }
 
         /// <summary>
         /// Получение списка пользователей
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Список пользователей</returns>
         [HttpGet]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
         public async Task<UserGetAllResponse> Get(UserTypeVM userType)
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            return await _userModel.GetAll(_userManager, currentUser, userType);
+            return await _userModel.GetAll(currentUser, userType);
         }
 
         /// <summary>
@@ -54,7 +53,7 @@ namespace MobileFueling.Api.Controllers.v1
         public async Task<UserGetOneResponse> Get(UserTypeVM userType, long id)
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            return await _userModel.GetOne(_userManager, currentUser, userType, id);
+            return await _userModel.GetOne(currentUser, userType, id);
         }
 
         /// <summary>
@@ -69,7 +68,7 @@ namespace MobileFueling.Api.Controllers.v1
         public async Task<UserUpdateResponse> Post(UserTypeVM userType, [FromBody] ApplicationUserVM value)
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            return await _userModel.PostOne(_userManager, currentUser, userType, value);
+            return await _userModel.PostOne(currentUser, userType, value);
         }
 
         /// <summary>
@@ -84,7 +83,7 @@ namespace MobileFueling.Api.Controllers.v1
         public async Task<UserDeleteResponse> Delete(UserTypeVM userType, long id)
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            return await _userModel.DeleteOne(_userManager, currentUser, userType, id);
+            return await _userModel.DeleteOne(currentUser, userType, id);
         }
     }
 }

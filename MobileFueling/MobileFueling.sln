@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29201.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobileFueling.Api", "MobileFueling.Api\MobileFueling.Api.csproj", "{C006282F-B26C-4F90-B182-FAC71AC912E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MobileFueling.Api", "MobileFueling.Api\MobileFueling.Api.csproj", "{C006282F-B26C-4F90-B182-FAC71AC912E1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobileFueling.Model", "MobileFueling.Model\MobileFueling.Model.csproj", "{CF3CCB3B-A067-4FC7-BD2B-C37AC093B41D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MobileFueling.Model", "MobileFueling.Model\MobileFueling.Model.csproj", "{CF3CCB3B-A067-4FC7-BD2B-C37AC093B41D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobileFueling.ViewModel", "MobileFueling.ViewModel\MobileFueling.ViewModel.csproj", "{BEDE29BE-873B-45A6-9F0A-F152DB20D658}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MobileFueling.ViewModel", "MobileFueling.ViewModel\MobileFueling.ViewModel.csproj", "{BEDE29BE-873B-45A6-9F0A-F152DB20D658}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobileFueling.DB", "MobileFueling.DB\MobileFueling.DB.csproj", "{B82961A3-B3D4-4A48-BA37-7DF7A63F476A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MobileFueling.DB", "MobileFueling.DB\MobileFueling.DB.csproj", "{B82961A3-B3D4-4A48-BA37-7DF7A63F476A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -27,28 +27,30 @@ namespace MobileFueling.Api.ApiModels.User
         private const string dateFormat = "dd.MM.yyyy";
         private readonly IStringLocalizer _stringLocalizer;
         private readonly FuelDbContext _fuelContext;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public UserModel(IStringLocalizer stringLocalizer)
+        public UserModel(IStringLocalizer stringLocalizer, UserManager<ApplicationUser> userManager)
         {
             _stringLocalizer = stringLocalizer;
+            _userManager = userManager;
         }
 
-        public UserModel(IStringLocalizer stringLocalizer, FuelDbContext fuelContext) : this(stringLocalizer)
+        public UserModel(IStringLocalizer stringLocalizer, UserManager<ApplicationUser> userManager, FuelDbContext fuelContext) : this(stringLocalizer, userManager)
         {
             _fuelContext = fuelContext;
         }
 
         #region AuthController methods
-        internal async Task<RegisterResponse> SaveUserAccountAsync(UserManager<ApplicationUser> userManager, ApplicationUser applicationUser, RegisterViewModel viewModel)
+        internal async Task<RegisterResponse> SaveUserAccountAsync(ApplicationUser applicationUser, RegisterViewModel viewModel)
         {
             var response = new RegisterResponse();
             try
             {
-                var creationResult = await userManager.CreateAsync(applicationUser, viewModel.Password);
+                var creationResult = await _userManager.CreateAsync(applicationUser, viewModel.Password);
                 if (creationResult.Succeeded)
                 {
                     // save user's claims
-                    await AddUserClaimsAsync(userManager, applicationUser, viewModel);
+                    await AddUserClaimsAsync(applicationUser, viewModel);
 
                     response.UserName = viewModel.Email;
                 }
@@ -64,26 +66,26 @@ namespace MobileFueling.Api.ApiModels.User
             return response;
         }
 
-        internal async Task<LoginResponse> GetUserAsync(UserManager<ApplicationUser> userManager, IConfiguration configuration, LoginViewModel viewModel)
+        internal async Task<LoginResponse> GetUserAsync(IConfiguration configuration, LoginViewModel viewModel)
         {
             var response = new LoginResponse();
 
             try
             {
-                var applicationUser = await userManager.FindByNameAsync(viewModel.Username);
+                var applicationUser = await _userManager.FindByNameAsync(viewModel.Username);
                 if (applicationUser == null)
                 {
                     response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.USERNAME_NOT_FOUND]);
                     return response;
                 }
 
-                if (!await userManager.CheckPasswordAsync(applicationUser, viewModel.Password))
+                if (!await _userManager.CheckPasswordAsync(applicationUser, viewModel.Password))
                 {
                     response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.USER_PASSWORD_WRONG]);
                     return response;
                 }
 
-                var loginClaim = await GetUserClaimAsync(userManager, applicationUser, UserConstants.CanLogin);
+                var loginClaim = await GetUserClaimAsync(applicationUser, UserConstants.CanLogin);
                 if (loginClaim == null || loginClaim.Value == "0")
                 {
                     response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.USER_CAN_NOT_LOGIN]);
@@ -125,7 +127,7 @@ namespace MobileFueling.Api.ApiModels.User
             return response;
         }
         
-        private async Task AddUserClaimsAsync(UserManager<ApplicationUser> userManager, ApplicationUser applicationUser, RegisterViewModel viewModel)
+        private async Task AddUserClaimsAsync(ApplicationUser applicationUser, RegisterViewModel viewModel)
         {
             var userClaims = new List<Claim>
                     {
@@ -143,18 +145,18 @@ namespace MobileFueling.Api.ApiModels.User
                 userClaims.Add(new Claim(UserConstants.DateOfBirth, viewModel.DateOfBirth.Value.ToString(dateFormat)));
             }
 
-            await userManager.AddClaimsAsync(applicationUser, userClaims);
+            await _userManager.AddClaimsAsync(applicationUser, userClaims);
         }
 
-        private async Task<Claim> GetUserClaimAsync(UserManager<ApplicationUser> userManager, ApplicationUser applicationUser, string claimName)
+        private async Task<Claim> GetUserClaimAsync(ApplicationUser applicationUser, string claimName)
         {
-            var allUserClaims = await userManager.GetClaimsAsync(applicationUser).ConfigureAwait(false);
+            var allUserClaims = await _userManager.GetClaimsAsync(applicationUser).ConfigureAwait(false);
             return allUserClaims.FirstOrDefault(x => x.Type == claimName);
         }
         #endregion
 
         #region UserController methods
-        public async Task<UserGetAllResponse> GetAll(UserManager<ApplicationUser> userManager, ApplicationUser currentUser, UserTypeVM userType)
+        public async Task<UserGetAllResponse> GetAll(ApplicationUser currentUser, UserTypeVM userType)
         {
             var response = new UserGetAllResponse();
 
@@ -162,7 +164,7 @@ namespace MobileFueling.Api.ApiModels.User
 
             Func<IEnumerable<ApplicationUser>, Task<IEnumerable<ApplicationUserVM>>> convertFunc = async (items) =>
             {
-                var tasks = items.Select(x => Convert(userManager, x));
+                var tasks = items.Select(Convert);
                 return await Task.WhenAll(tasks);
             };
 
@@ -203,7 +205,7 @@ namespace MobileFueling.Api.ApiModels.User
             return response;
         }
 
-        public async Task<UserGetOneResponse> GetOne(UserManager<ApplicationUser> userManager, ApplicationUser currentUser, UserTypeVM userType, long id)
+        public async Task<UserGetOneResponse> GetOne(ApplicationUser currentUser, UserTypeVM userType, long id)
         {
             var response = new UserGetOneResponse();
             var applicationUserType = GetApplicationUserType(currentUser);
@@ -241,7 +243,7 @@ namespace MobileFueling.Api.ApiModels.User
 
             if (item != null)
             {
-                response.Item = await Convert(userManager, item);
+                response.Item = await Convert(item);
             }
             else if(!response.HasError())
             {
@@ -251,7 +253,7 @@ namespace MobileFueling.Api.ApiModels.User
             return response;
         }
 
-        public async Task<UserUpdateResponse> PostOne(UserManager<ApplicationUser> userManager, ApplicationUser currentUser, UserTypeVM userType, ApplicationUserVM applicationUserVM)
+        public async Task<UserUpdateResponse> PostOne(ApplicationUser currentUser, UserTypeVM userType, ApplicationUserVM applicationUserVM)
         {
             var response = new UserUpdateResponse();
             var applicationUserType = GetApplicationUserType(currentUser);
@@ -283,20 +285,20 @@ namespace MobileFueling.Api.ApiModels.User
             applicationUserValue.Email = applicationUserVM.Email;
             applicationUserValue.UserName = applicationUserVM.Email;
 
-            var result = await userManager.UpdateAsync(applicationUserValue);
+            var result = await _userManager.UpdateAsync(applicationUserValue);
             if (!result.Succeeded)
             {
                 response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.USER_NOT_FOUND]);
                 return response;
             }
 
-            await UpdateUserClaimsAsync(userManager, applicationUserVM, applicationUserValue).ConfigureAwait(false);
+            await UpdateUserClaimsAsync(applicationUserVM, applicationUserValue).ConfigureAwait(false);
 
             response.Id = applicationUserValue.Id;
             return response;
         }
 
-        public async Task<UserDeleteResponse> DeleteOne(UserManager<ApplicationUser> userManager, ApplicationUser currentUser, UserTypeVM userType, long id)
+        public async Task<UserDeleteResponse> DeleteOne(ApplicationUser currentUser, UserTypeVM userType, long id)
         {
             var response = new UserDeleteResponse();
             var applicationUserType = GetApplicationUserType(currentUser);
@@ -320,45 +322,45 @@ namespace MobileFueling.Api.ApiModels.User
                 return response;
             }
 
-            var result = await userManager.DeleteAsync(applicationUserValue);
+            var result = await _userManager.DeleteAsync(applicationUserValue);
             response.IsSuccess = result.Succeeded;
             return response;
         }
 
-        private async Task UpdateUserClaimsAsync(UserManager<ApplicationUser> userManager, ApplicationUserVM applicationUserVM, ApplicationUser applicationUser)
+        private async Task UpdateUserClaimsAsync(ApplicationUserVM applicationUserVM, ApplicationUser applicationUser)
         {
-            await UpdateUserClaimAsync(userManager, applicationUser, UserConstants.Name, applicationUserVM.Name).ConfigureAwait(false);
+            await UpdateUserClaimAsync(applicationUser, UserConstants.Name, applicationUserVM.Name).ConfigureAwait(false);
 
-            await UpdateUserClaimAsync(userManager, applicationUser, UserConstants.FirstName, applicationUserVM.FirstName).ConfigureAwait(false);
+            await UpdateUserClaimAsync(applicationUser, UserConstants.FirstName, applicationUserVM.FirstName).ConfigureAwait(false);
 
-            await UpdateUserClaimAsync(userManager, applicationUser, UserConstants.MiddleName, applicationUserVM.MiddleName).ConfigureAwait(false);
+            await UpdateUserClaimAsync(applicationUser, UserConstants.MiddleName, applicationUserVM.MiddleName).ConfigureAwait(false);
 
-            await UpdateUserClaimAsync(userManager, applicationUser, UserConstants.CanLogin, applicationUserVM.CanLogin ? "1" : "0").ConfigureAwait(false);
+            await UpdateUserClaimAsync(applicationUser, UserConstants.CanLogin, applicationUserVM.CanLogin ? "1" : "0").ConfigureAwait(false);
 
-            await UpdateUserClaimAsync(userManager, applicationUser, UserConstants.DateOfBirth, applicationUserVM.DateOfBirth?.ToString(dateFormat)).ConfigureAwait(false);
+            await UpdateUserClaimAsync(applicationUser, UserConstants.DateOfBirth, applicationUserVM.DateOfBirth?.ToString(dateFormat)).ConfigureAwait(false);
         }
 
-        private async Task UpdateUserClaimAsync(UserManager<ApplicationUser> userManager, ApplicationUser applicationUser, string type, string value)
+        private async Task UpdateUserClaimAsync(ApplicationUser applicationUser, string type, string value)
         {
-            var claim = await GetUserClaimAsync(userManager, applicationUser, type);
+            var claim = await GetUserClaimAsync(applicationUser, type);
             if (claim != null && claim.Value != value)
             {
-                await ReplaceUserClaimAsync(userManager, applicationUser, claim, new Claim(type, value));
+                await ReplaceUserClaimAsync(applicationUser, claim, new Claim(type, value));
             }
             else
             {
-                await AddUserClaimAsync(userManager, applicationUser, new Claim(type, value));
+                await AddUserClaimAsync(applicationUser, new Claim(type, value));
             }
         }
 
-        private async Task AddUserClaimAsync(UserManager<ApplicationUser> userManager, ApplicationUser applicationUser, Claim claim)
+        private async Task AddUserClaimAsync(ApplicationUser applicationUser, Claim claim)
         {
-            await userManager.AddClaimAsync(applicationUser, claim).ConfigureAwait(false);
+            await _userManager.AddClaimAsync(applicationUser, claim).ConfigureAwait(false);
         }
 
-        private async Task ReplaceUserClaimAsync(UserManager<ApplicationUser> userManager, ApplicationUser applicationUser, Claim oldClaim, Claim newClaim)
+        private async Task ReplaceUserClaimAsync(ApplicationUser applicationUser, Claim oldClaim, Claim newClaim)
         {
-            await userManager.ReplaceClaimAsync(applicationUser, oldClaim, newClaim).ConfigureAwait(false);
+            await _userManager.ReplaceClaimAsync(applicationUser, oldClaim, newClaim).ConfigureAwait(false);
         }
 
         private UserType GetApplicationUserType(ApplicationUser applicationUser)
@@ -382,12 +384,12 @@ namespace MobileFueling.Api.ApiModels.User
             throw new NotImplementedException("Not implemented user type");
         }
 
-        private async Task<ApplicationUserVM> Convert(UserManager<ApplicationUser> userManager, ApplicationUser applicationUser)
+        private async Task<ApplicationUserVM> Convert(ApplicationUser applicationUser)
         {
             if (applicationUser == null)
                 return null;
 
-            var claims = await GetUserClaimsAsync(userManager, applicationUser);
+            var claims = await GetUserClaimsAsync(applicationUser);
             var birthdayClaim = claims?.FirstOrDefault(x => x.Type == UserConstants.DateOfBirth)?.Value;
             return new ApplicationUserVM
             {
@@ -403,9 +405,9 @@ namespace MobileFueling.Api.ApiModels.User
             };
         }
 
-        private async Task<IEnumerable<Claim>> GetUserClaimsAsync(UserManager<ApplicationUser> userManager, ApplicationUser applicationUser)
+        private async Task<IEnumerable<Claim>> GetUserClaimsAsync(ApplicationUser applicationUser)
         {
-            return await userManager.GetClaimsAsync(applicationUser).ConfigureAwait(false);
+            return await _userManager.GetClaimsAsync(applicationUser).ConfigureAwait(false);
         }
         #endregion
     }

@@ -7,13 +7,13 @@ namespace MobileFueling.ViewModel
     /// </summary>
     public enum UserTypeVM
     {
-        [Description("Admin")]
+        [Description("Администратор")]
         Admin = 0,
-        [Description("Driver")]
+        [Description("Водитель")]
         Driver,
-        [Description("Client")]
+        [Description("Клиент")]
         Client,
-        [Description("Manager")]
+        [Description("Менеджер")]
         Manager
     }
 }

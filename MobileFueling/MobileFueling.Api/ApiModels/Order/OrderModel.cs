@@ -1,5 +1,9 @@
-﻿using Microsoft.Extensions.Localization;
+﻿using System;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Localization;
+using MobileFueling.Api.Contract.Order;
 using MobileFueling.DB;
+using MobileFueling.Model;
 
 namespace MobileFueling.Api.ApiModels.Order
 {
@@ -13,5 +17,17 @@ namespace MobileFueling.Api.ApiModels.Order
             _fuelContext = fuelContext;
             _stringLocalizer = stringLocalizer;
         }
+
+        public async Task<OrderGetAllResponse> GetAll(ApplicationUser currentUser, OrderGetAllRequest request)
+        {
+            return null;
+        }
+
+        public async Task<OrderGetOneResponse> GetOne(ApplicationUser currentUser, long id)
+        {
+            return null;
+        }
+
+        //private async Task<Order>
     }
 }

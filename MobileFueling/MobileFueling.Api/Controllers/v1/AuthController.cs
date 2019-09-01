@@ -14,17 +14,15 @@ namespace MobileFueling.Api.Controllers.v1
     [Route("api/v1/[controller]")]
     public class AuthController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly UserModel _userModel;
         private readonly IStringLocalizer _stringLocalizer;
 
         public AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration, IStringLocalizer stringLocalizer)
         {
-            _userManager = userManager;
             _configuration = configuration;
             _stringLocalizer = stringLocalizer;
-            _userModel = new UserModel(_stringLocalizer);
+            _userModel = new UserModel(_stringLocalizer, userManager);
         }
 
         /// <summary>
@@ -44,7 +42,7 @@ namespace MobileFueling.Api.Controllers.v1
                 return BadRequest(ModelState);
 
             var applicationUser = ApplicationUserFactory.CreateApplicationUser(viewModel);
-            return Ok(await _userModel.SaveUserAccountAsync(_userManager, applicationUser, viewModel));
+            return Ok(await _userModel.SaveUserAccountAsync(applicationUser, viewModel));
         }
 
         /// <summary>
@@ -63,7 +61,7 @@ namespace MobileFueling.Api.Controllers.v1
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            return Ok(await _userModel.GetUserAsync(_userManager, _configuration, viewModel));
+            return Ok(await _userModel.GetUserAsync(_configuration, viewModel));
         }
     }
 }
