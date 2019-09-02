@@ -3,8 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
-using MobileFueling.Api.Common.BaseResponseResources;
 using MobileFueling.Api.Common.Localization;
+using MobileFueling.Api.Common.Settings;
 using MobileFueling.Api.Contract;
 using MobileFueling.Api.Contract.UserData;
 using MobileFueling.DB;
@@ -24,7 +24,6 @@ namespace MobileFueling.Api.ApiModels.User
 {
     public class UserModel
     {
-        private const string dateFormat = "dd.MM.yyyy";
         private readonly IStringLocalizer _stringLocalizer;
         private readonly FuelDbContext _fuelContext;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -56,7 +55,7 @@ namespace MobileFueling.Api.ApiModels.User
                 }
                 else
                 {
-                    response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.USER_NOT_CREATED]);
+                    response.AddError(_stringLocalizer[CustomStringLocalizer.USER_NOT_CREATED]);
                 }
             }
             catch (Exception ex)
@@ -75,20 +74,20 @@ namespace MobileFueling.Api.ApiModels.User
                 var applicationUser = await _userManager.FindByNameAsync(viewModel.Username);
                 if (applicationUser == null)
                 {
-                    response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.USERNAME_NOT_FOUND]);
+                    response.AddError(_stringLocalizer[CustomStringLocalizer.USERNAME_NOT_FOUND]);
                     return response;
                 }
 
                 if (!await _userManager.CheckPasswordAsync(applicationUser, viewModel.Password))
                 {
-                    response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.USER_PASSWORD_WRONG]);
+                    response.AddError(_stringLocalizer[CustomStringLocalizer.USER_PASSWORD_WRONG]);
                     return response;
                 }
 
                 var loginClaim = await GetUserClaimAsync(applicationUser, UserConstants.CanLogin);
                 if (loginClaim == null || loginClaim.Value == "0")
                 {
-                    response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.USER_CAN_NOT_LOGIN]);
+                    response.AddError(_stringLocalizer[CustomStringLocalizer.USER_CAN_NOT_LOGIN]);
                     return response;
                 }
 
@@ -142,7 +141,7 @@ namespace MobileFueling.Api.ApiModels.User
             }
             if (viewModel.DateOfBirth.HasValue)
             {
-                userClaims.Add(new Claim(UserConstants.DateOfBirth, viewModel.DateOfBirth.Value.ToString(dateFormat)));
+                userClaims.Add(new Claim(UserConstants.DateOfBirth, viewModel.DateOfBirth.Value.ToString(FuelSettings.DATEFORMAT)));
             }
 
             await _userManager.AddClaimsAsync(applicationUser, userClaims);
@@ -175,28 +174,28 @@ namespace MobileFueling.Api.ApiModels.User
                     response.Items = await convertFunc(admins);
                     break;
                 case UserTypeVM.Admin when applicationUserType != UserType.Admin:
-                    response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USERLIST]);
+                    response.AddError(_stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USERLIST]);
                     break;
                 case UserTypeVM.Client when applicationUserType == UserType.Admin || applicationUserType == UserType.Manager:
                     var clients = await _fuelContext.ClientUsers.ToListAsync();
                     response.Items = await convertFunc(clients);
                     break;
                 case UserTypeVM.Client when applicationUserType != UserType.Admin && applicationUserType != UserType.Manager:
-                    response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USERLIST]);
+                    response.AddError(_stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USERLIST]);
                     break;
                 case UserTypeVM.Driver when applicationUserType == UserType.Admin || applicationUserType == UserType.Manager:
                     var drivers = await _fuelContext.DriverUsers.ToListAsync();
                     response.Items = await convertFunc(drivers);
                     break;
                 case UserTypeVM.Driver when applicationUserType != UserType.Admin && applicationUserType != UserType.Manager:
-                    response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USERLIST]);
+                    response.AddError(_stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USERLIST]);
                     break;
                 case UserTypeVM.Manager when applicationUserType == UserType.Admin:
                     var managers = await _fuelContext.ManagerUsers.ToListAsync();
                     response.Items = await convertFunc(managers);
                     break;
                 case UserTypeVM.Manager when applicationUserType != UserType.Admin:
-                    response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USERLIST]);
+                    response.AddError(_stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USERLIST]);
                     break;
                 default:
                     throw new NotImplementedException("Not implemented user type");
@@ -217,25 +216,25 @@ namespace MobileFueling.Api.ApiModels.User
                     item = await _fuelContext.AdminUsers.FirstOrDefaultAsync(x => x.Id == id);
                     break;
                 case UserTypeVM.Admin when applicationUserType != UserType.Admin:
-                    response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USER]);
+                    response.AddError(_stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USER]);
                     break;
                 case UserTypeVM.Client when applicationUserType == UserType.Admin || applicationUserType == UserType.Manager:
                     item = await _fuelContext.ClientUsers.FirstOrDefaultAsync(x => x.Id == id);
                     break;
                 case UserTypeVM.Client when applicationUserType != UserType.Admin && applicationUserType != UserType.Manager:
-                    response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USER]);
+                    response.AddError(_stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USER]);
                     break;
                 case UserTypeVM.Driver when applicationUserType == UserType.Admin || applicationUserType == UserType.Manager:
                     item = await _fuelContext.DriverUsers.FirstOrDefaultAsync(x => x.Id == id);
                     break;
                 case UserTypeVM.Driver when applicationUserType != UserType.Admin && applicationUserType != UserType.Manager:
-                    response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USER]);
+                    response.AddError(_stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USER]);
                     break;
                 case UserTypeVM.Manager when applicationUserType == UserType.Admin:
                     item = await _fuelContext.ManagerUsers.FirstOrDefaultAsync(x => x.Id == id);
                     break;
                 case UserTypeVM.Manager when applicationUserType != UserType.Admin:
-                    response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USER]);
+                    response.AddError(_stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_RECEIVE_USER]);
                     break;
                 default:
                     throw new NotImplementedException("Not implemented user type");
@@ -247,7 +246,7 @@ namespace MobileFueling.Api.ApiModels.User
             }
             else if(!response.HasError())
             {
-                response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.USER_NOT_FOUND]);
+                response.AddError(_stringLocalizer[CustomStringLocalizer.USER_NOT_FOUND]);
             }
 
             return response;
@@ -260,13 +259,13 @@ namespace MobileFueling.Api.ApiModels.User
 
             if (applicationUserType != UserType.Admin && applicationUserType != UserType.Manager) // редактировать может только админ или менеджер
             {
-                response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_ADD_OR_UPDATE_USER]);
+                response.AddError(_stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_ADD_OR_UPDATE_USER]);
                 return response;
             }
 
             if (applicationUserType == UserType.Manager && userType == UserTypeVM.Admin) // менеджер хочет редактировать админа
             {
-                response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_ADD_OR_UPDATE_USER]);
+                response.AddError(_stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_ADD_OR_UPDATE_USER]);
                 return response;
             }
 
@@ -278,7 +277,7 @@ namespace MobileFueling.Api.ApiModels.User
 
             if (applicationUserValue == null)
             {
-                response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.USER_NOT_FOUND]);
+                response.AddError(_stringLocalizer[CustomStringLocalizer.USER_NOT_FOUND]);
                 return response;
             }
 
@@ -288,7 +287,7 @@ namespace MobileFueling.Api.ApiModels.User
             var result = await _userManager.UpdateAsync(applicationUserValue);
             if (!result.Succeeded)
             {
-                response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.USER_NOT_FOUND]);
+                response.AddError(_stringLocalizer[CustomStringLocalizer.USER_NOT_FOUND]);
                 return response;
             }
 
@@ -305,20 +304,20 @@ namespace MobileFueling.Api.ApiModels.User
 
             if (applicationUserType != UserType.Admin && applicationUserType != UserType.Manager) // удалить может только админ или менеджер
             {
-                response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_DELETE_USER]);
+                response.AddError(_stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_DELETE_USER]);
                 return response;
             }
 
             if (applicationUserType == UserType.Manager && userType == UserTypeVM.Admin) // менеджер хочет удалить админа
             {
-                response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_DELETE_USER]);
+                response.AddError(_stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_DELETE_USER]);
                 return response;
             }
 
             var applicationUserValue = await ApplicationUserFactory.GetApplicationUserAsync(_fuelContext, userType, id);
             if (applicationUserValue == null)
             {
-                response.AddMessage(MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.USER_NOT_FOUND]);
+                response.AddError(_stringLocalizer[CustomStringLocalizer.USER_NOT_FOUND]);
                 return response;
             }
 
@@ -337,7 +336,7 @@ namespace MobileFueling.Api.ApiModels.User
 
             await UpdateUserClaimAsync(applicationUser, UserConstants.CanLogin, applicationUserVM.CanLogin ? "1" : "0").ConfigureAwait(false);
 
-            await UpdateUserClaimAsync(applicationUser, UserConstants.DateOfBirth, applicationUserVM.DateOfBirth?.ToString(dateFormat)).ConfigureAwait(false);
+            await UpdateUserClaimAsync(applicationUser, UserConstants.DateOfBirth, applicationUserVM.DateOfBirth?.ToString(FuelSettings.DATEFORMAT)).ConfigureAwait(false);
         }
 
         private async Task UpdateUserClaimAsync(ApplicationUser applicationUser, string type, string value)
@@ -401,7 +400,7 @@ namespace MobileFueling.Api.ApiModels.User
                 MiddleName = claims?.FirstOrDefault(x => x.Type == UserConstants.MiddleName)?.Value,
                 UserType = (UserTypeVM)GetApplicationUserType(applicationUser),
                 CanLogin = claims?.FirstOrDefault(x => x.Type == UserConstants.CanLogin)?.Value == "1",
-                DateOfBirth = !string.IsNullOrEmpty(birthdayClaim) ? DateTime.ParseExact(birthdayClaim, dateFormat, CultureInfo.InvariantCulture) : (DateTime?)null
+                DateOfBirth = !string.IsNullOrEmpty(birthdayClaim) ? DateTime.ParseExact(birthdayClaim, FuelSettings.DATEFORMAT, CultureInfo.InvariantCulture) : (DateTime?)null
             };
         }
 

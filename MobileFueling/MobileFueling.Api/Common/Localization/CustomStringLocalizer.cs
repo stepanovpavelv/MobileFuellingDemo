@@ -20,6 +20,7 @@ namespace MobileFueling.Api.Common.Localization
         public const string NO_RIGHTS_TO_ADD_OR_UPDATE_USER = nameof(NO_RIGHTS_TO_ADD_OR_UPDATE_USER);
         public const string NO_RIGHTS_TO_DELETE_USER = nameof(NO_RIGHTS_TO_DELETE_USER);
         public const string USER_NOT_FOUND = nameof(USER_NOT_FOUND);
+        public const string NO_RIGHTS_TO_CREATE_UPDATE_ORDER = nameof(NO_RIGHTS_TO_CREATE_UPDATE_ORDER);
 
         public CustomStringLocalizer()
         {
@@ -34,7 +35,8 @@ namespace MobileFueling.Api.Common.Localization
                 {NO_RIGHTS_TO_RECEIVE_USER, "User has no rights to receive userinfo" },
                 {NO_RIGHTS_TO_ADD_OR_UPDATE_USER, "User has no rights to add or update userinfo" },
                 {NO_RIGHTS_TO_DELETE_USER, "User has no rights to delete user" },
-                {USER_NOT_FOUND, "Can not find user by this id" }
+                {USER_NOT_FOUND, "Can not find user by this id" },
+                {NO_RIGHTS_TO_CREATE_UPDATE_ORDER, "User has no rights to add or update order" }
             };
             var ruDict = new Dictionary<string, string>
             {
@@ -47,7 +49,8 @@ namespace MobileFueling.Api.Common.Localization
                 {NO_RIGHTS_TO_RECEIVE_USERLIST, "Нет прав на просмотр информации по пользователю" },
                 {NO_RIGHTS_TO_ADD_OR_UPDATE_USER, "Нет прав на добавление или изменение информации по пользователю" },
                 {NO_RIGHTS_TO_DELETE_USER, "Нет прав на удаление пользователя" },
-                {USER_NOT_FOUND, "Невозможно найти пользователя по данному идентификатору" }
+                {USER_NOT_FOUND, "Невозможно найти пользователя по данному идентификатору" },
+                {NO_RIGHTS_TO_CREATE_UPDATE_ORDER, "Нет прав на добавление/редактирование информации по заказу" }
             };
 
             _resources = new Dictionary<string, Dictionary<string, string>>

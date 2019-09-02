@@ -21,5 +21,9 @@ namespace MobileFueling.DB
         public DbSet<Driver> DriverUsers { get; set; }
         public DbSet<Client> ClientUsers { get; set; }
         public DbSet<Manager> ManagerUsers { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<ClientOrderDetalization> ClientDetalizations { get; set; }
+        public DbSet<DriverOrderDetalization> DriverDetalizations { get; set; }
+        public DbSet<OrderStatusHistory> StatusHistory { get; set; }
     }
 }

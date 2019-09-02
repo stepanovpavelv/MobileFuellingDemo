@@ -38,37 +38,46 @@ namespace MobileFueling.Api.Controllers.v1
             return await _orderModel.GetAll(currentUser, request);
         }
 
-        // GET: api/Order/5
+        /// <summary>
+        /// Получение информации по заказу
+        /// </summary>
+        /// <param name="id">Идентификатор заказа</param>
+        /// <returns>Заказ</returns>
         [HttpGet("{id}", Name = "GetOrder")]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
-        public string Get(int id)
+        public async Task<OrderGetOneResponse> Get(long id)
         {
-            return "value";
+            var currentUser = await _userManager.GetUserAsync(User);
+            return await _orderModel.GetOne(currentUser, id);
         }
 
-        // POST: api/Order
+        /// <summary>
+        /// Обновление клиентом деталей заказа
+        /// </summary>
+        /// <param name="request">Запрос (контракт(</param>
+        /// <returns>Заказ</returns>
         [HttpPost]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
-        public void Post([FromBody] string value)
+        public async Task<OrderUpdateResponse> Post([FromBody] OrderUpdateRequest request)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            return await _orderModel.PostOne(currentUser, request);
         }
 
+        /// <summary>
+        /// Обновление водителем/менеджером деталей заказа
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="value"></param>
         // PUT: api/Order/5
         [HttpPut("{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
-        public void Put(int id, [FromBody] string value)
+        public void Put(long id, [FromBody] string value)
         {
-        }
 
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(401)]
-        public void Delete(int id)
-        {
         }
     }
 }

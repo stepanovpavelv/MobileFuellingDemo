@@ -4,7 +4,7 @@ using System;
 namespace MobileFueling.Api.Common.BaseResponseResources
 {
     /// <summary>
-    /// Базовый ответ Fuelling API
+    /// Базовый ответ Fuelling API с обёрткой ResultQueryInfo 
     /// </summary>
     public class BaseResponse
     {
@@ -18,6 +18,11 @@ namespace MobileFueling.Api.Common.BaseResponseResources
         public void AddMessage(MessageType type, LocalizedString text)
         {
             ResultQueryInfo.AddMessage(type, text);
+        }
+
+        public void AddError(LocalizedString text)
+        {
+            ResultQueryInfo.AddMessage(MessageType.ERROR, text);
         }
 
         public void AddException(Exception ex)

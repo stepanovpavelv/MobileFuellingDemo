@@ -36,7 +36,7 @@ namespace MobileFueling.Api.ApiModels.FuelType
             var item = await _fuelContext.FuelTypes.FirstOrDefaultAsync(x => x.Id == id);
             if (item == null)
             {
-                response.AddMessage(Common.BaseResponseResources.MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.FUEL_TYPE_CAN_NOT_FIND]);
+                response.AddError(_stringLocalizer[CustomStringLocalizer.FUEL_TYPE_CAN_NOT_FIND]);
                 return response;
             }
 
@@ -74,7 +74,7 @@ namespace MobileFueling.Api.ApiModels.FuelType
             var item = await _fuelContext.FuelTypes.FirstOrDefaultAsync(x => x.Id == id);
             if (item == null)
             {
-                response.AddMessage(Common.BaseResponseResources.MessageType.ERROR, _stringLocalizer[CustomStringLocalizer.FUEL_TYPE_CAN_NOT_FIND]);
+                response.AddError(_stringLocalizer[CustomStringLocalizer.FUEL_TYPE_CAN_NOT_FIND]);
                 return response;
             }
 
