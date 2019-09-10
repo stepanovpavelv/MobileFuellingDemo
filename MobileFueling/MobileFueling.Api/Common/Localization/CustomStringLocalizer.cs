@@ -56,7 +56,7 @@ namespace MobileFueling.Api.Common.Localization
                 {USER_CAN_NOT_LOGIN, "Пользователь не имеет права входа в систему или заблокирован" },
                 {FUEL_TYPE_CAN_NOT_FIND, "Невозможно найти тип топлива по данному идентификатору" },
                 {NO_RIGHTS_TO_RECEIVE_USERLIST, "Нет прав на просмотр списка пользователей" },
-                {NO_RIGHTS_TO_RECEIVE_USERLIST, "Нет прав на просмотр информации по пользователю" },
+                {NO_RIGHTS_TO_RECEIVE_USER, "Нет прав на просмотр информации по пользователю" },
                 {NO_RIGHTS_TO_ADD_OR_UPDATE_USER, "Нет прав на добавление или изменение информации по пользователю" },
                 {NO_RIGHTS_TO_DELETE_USER, "Нет прав на удаление пользователя" },
                 {USER_NOT_FOUND, "Невозможно найти пользователя по данному идентификатору" },

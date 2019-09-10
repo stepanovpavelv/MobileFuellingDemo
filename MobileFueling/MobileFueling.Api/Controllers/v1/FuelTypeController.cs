@@ -5,7 +5,6 @@ using MobileFueling.Api.ApiModels.FuelType;
 using MobileFueling.Api.Contract.FuelType;
 using MobileFueling.DB;
 using MobileFueling.ViewModel;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace MobileFueling.Api.Controllers.v1
@@ -29,6 +28,7 @@ namespace MobileFueling.Api.Controllers.v1
         /// <returns>Типы топлива</returns>
         [HttpGet]
         [ProducesResponseType(200)]
+        [ProducesResponseType(401)]
         public async Task<FuelTypeGetAllResponse> Get()
         {
             return await _fuelTypeModel.GetAll();
@@ -41,6 +41,7 @@ namespace MobileFueling.Api.Controllers.v1
         /// <returns>Тип топлива</returns>
         [HttpGet("{id}", Name = "GetFuelType")]
         [ProducesResponseType(200)]
+        [ProducesResponseType(401)]
         public async Task<FuelTypeGetOneResponse> Get(long id)
         {
             return await _fuelTypeModel.GetOne(id);
@@ -53,6 +54,7 @@ namespace MobileFueling.Api.Controllers.v1
         /// <returns>Идентификатор</returns>
         [HttpPost]
         [ProducesResponseType(200)]
+        [ProducesResponseType(401)]
         public async Task<FuelTypeUpdateResponse> Post([FromBody] FuelTypeVM value)
         {
             return await _fuelTypeModel.PostOne(value);
@@ -64,6 +66,7 @@ namespace MobileFueling.Api.Controllers.v1
         /// <param name="id">Идентификатор</param>
         [HttpDelete("{id}")]
         [ProducesResponseType(200)]
+        [ProducesResponseType(401)]
         public async Task<FuelTypeDeleteResponse> Delete(long id)
         {
             return await _fuelTypeModel.DeleteOne(id);
