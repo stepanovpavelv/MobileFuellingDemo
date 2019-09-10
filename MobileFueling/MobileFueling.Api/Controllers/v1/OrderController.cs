@@ -6,6 +6,7 @@ using MobileFueling.Api.ApiModels.Order;
 using MobileFueling.Api.Contract.Order;
 using MobileFueling.DB;
 using MobileFueling.Model;
+using MobileFueling.ViewModel;
 using System.Threading.Tasks;
 
 namespace MobileFueling.Api.Controllers.v1
@@ -70,14 +71,30 @@ namespace MobileFueling.Api.Controllers.v1
         /// Обновление водителем/менеджером деталей заказа
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="value"></param>
-        // PUT: api/Order/5
+        /// <param name="request"></param>
+        /// <returns>Ответ (контракт)</returns>
         [HttpPut("{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
-        public void Put(long id, [FromBody] string value)
+        public async Task<OrderPutResponse> Put(long id, [FromBody] OrderPutRequest request)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            return await _orderModel.PutOne(currentUser, request);
+        }
 
+        /// <summary>
+        /// Обновление статуса заказа
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="status"></param>
+        /// <returns>Ответ (контракт)</returns>
+        [HttpPut("{id}/{status}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(401)]
+        public async Task<OrderPutResponse> Put(long id, OrderStatusVM status)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            return await _orderModel.PutOne(currentUser, id, status);
         }
     }
 }

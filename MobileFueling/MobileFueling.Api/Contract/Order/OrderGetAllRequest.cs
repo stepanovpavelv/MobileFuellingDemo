@@ -24,8 +24,8 @@ namespace MobileFueling.Api.Contract.Order
         public IEnumerable<string> Numbers { get; set; }
 
         /// <summary>
-        /// Статус заказа
+        /// Статусы заказов
         /// </summary>
-        public OrderStatusVM Status { get; set; }
+        public IEnumerable<OrderStatusVM> Statuses { get; set; }
     }
 }
