@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
@@ -17,12 +18,14 @@ namespace MobileFueling.Api.Controllers.v1
         private readonly IConfiguration _configuration;
         private readonly UserModel _userModel;
         private readonly IStringLocalizer _stringLocalizer;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration, IStringLocalizer stringLocalizer)
         {
             _configuration = configuration;
             _stringLocalizer = stringLocalizer;
-            _userModel = new UserModel(_stringLocalizer, userManager);
+            _userManager = userManager;
+            _userModel = new UserModel(_stringLocalizer, _userManager);
         }
 
         /// <summary>
@@ -32,6 +35,7 @@ namespace MobileFueling.Api.Controllers.v1
         /// <returns>Имя созданного пользователя или сообщение об ошибке</returns>
         /// <response code="200">Возвращает имя созданного пользователя</response>
         /// <response code="400">Возвращает, если модель была null</response>
+        [Authorize]
         [Route("register")]
         [HttpPost]
         [ProducesResponseType(200)]
@@ -41,8 +45,9 @@ namespace MobileFueling.Api.Controllers.v1
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            var currentUser = await _userManager.GetUserAsync(User);
             var applicationUser = ApplicationUserFactory.CreateApplicationUser(viewModel);
-            return Ok(await _userModel.SaveUserAccountAsync(applicationUser, viewModel));
+            return Ok(await _userModel.SaveUserAccountAsync(applicationUser, currentUser, viewModel));
         }
 
         /// <summary>

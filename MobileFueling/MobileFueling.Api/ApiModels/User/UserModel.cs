@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
@@ -40,9 +41,16 @@ namespace MobileFueling.Api.ApiModels.User
         }
 
         #region AuthController methods
-        internal async Task<RegisterResponse> SaveUserAccountAsync(ApplicationUser applicationUser, RegisterViewModel viewModel)
+        internal async Task<RegisterResponse> SaveUserAccountAsync(ApplicationUser applicationUser, ApplicationUser currentUser, RegisterViewModel viewModel)
         {
             var response = new RegisterResponse();
+
+            if (currentUser is Client || currentUser is Driver || (currentUser is Manager && applicationUser is SystemAdmin))
+            {
+                response.AddError(_stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_ADD_OR_UPDATE_USER]);
+                return response;
+            }
+
             try
             {
                 var creationResult = await _userManager.CreateAsync(applicationUser, viewModel.Password);
