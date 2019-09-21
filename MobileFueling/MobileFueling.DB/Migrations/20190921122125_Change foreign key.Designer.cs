@@ -2,29 +2,30 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MobileFueling.DB;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace MobileFueling.DB.Migrations
 {
     [DbContext(typeof(FuelDbContext))]
-    [Migration("20190821204635_Add identity on fuel types")]
-    partial class Addidentityonfueltypes
+    [Migration("20190921122125_Change foreign key")]
+    partial class Changeforeignkey
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
                 .HasAnnotation("ProductVersion", "2.2.6-servicing-10079")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 128)
+                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("MobileFueling.Model.ApplicationRole", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken();
@@ -39,7 +40,8 @@ namespace MobileFueling.DB.Migrations
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
-                        .HasName("RoleNameIndex");
+                        .HasName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles");
                 });
@@ -47,7 +49,8 @@ namespace MobileFueling.DB.Migrations
             modelBuilder.Entity("MobileFueling.Model.ApplicationRoleClaim", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("ClaimType");
 
@@ -65,7 +68,8 @@ namespace MobileFueling.DB.Migrations
             modelBuilder.Entity("MobileFueling.Model.ApplicationUser", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<int>("AccessFailedCount");
 
@@ -110,7 +114,8 @@ namespace MobileFueling.DB.Migrations
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
-                        .HasName("UserNameIndex");
+                        .HasName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers");
 
@@ -120,7 +125,8 @@ namespace MobileFueling.DB.Migrations
             modelBuilder.Entity("MobileFueling.Model.ApplicationUserClaim", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("ClaimType");
 
@@ -183,7 +189,8 @@ namespace MobileFueling.DB.Migrations
             modelBuilder.Entity("MobileFueling.Model.Car", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<long>("ClientId");
 
@@ -206,10 +213,13 @@ namespace MobileFueling.DB.Migrations
             modelBuilder.Entity("MobileFueling.Model.ClientOrderDetalization", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Address")
                         .HasMaxLength(250);
+
+                    b.Property<long>("ClientId");
 
                     b.Property<DateTime>("CreationDate");
 
@@ -225,14 +235,16 @@ namespace MobileFueling.DB.Migrations
 
                     b.Property<long>("OrderId");
 
-                    b.Property<decimal>("Quantity");
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(7,2)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ClientId");
+
                     b.HasIndex("FuelTypeId");
 
-                    b.HasIndex("OrderId")
-                        .IsUnique();
+                    b.HasIndex("OrderId");
 
                     b.ToTable("ClientOrderDetalizations");
                 });
@@ -240,7 +252,8 @@ namespace MobileFueling.DB.Migrations
             modelBuilder.Entity("MobileFueling.Model.DriverOrderDetalization", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<long>("DriverId");
 
@@ -260,7 +273,8 @@ namespace MobileFueling.DB.Migrations
             modelBuilder.Entity("MobileFueling.Model.FuelType", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Name")
                         .HasMaxLength(50);
@@ -273,13 +287,12 @@ namespace MobileFueling.DB.Migrations
             modelBuilder.Entity("MobileFueling.Model.Order", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<long>("ClientId");
+                    b.Property<string>("Number");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ClientId");
 
                     b.ToTable("Orders");
                 });
@@ -287,7 +300,10 @@ namespace MobileFueling.DB.Migrations
             modelBuilder.Entity("MobileFueling.Model.OrderStatusHistory", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("ChangeTime");
 
                     b.Property<long>("OrderId");
 
@@ -312,6 +328,20 @@ namespace MobileFueling.DB.Migrations
                     b.HasBaseType("MobileFueling.Model.ApplicationUser");
 
                     b.HasDiscriminator().HasValue("Driver");
+                });
+
+            modelBuilder.Entity("MobileFueling.Model.Manager", b =>
+                {
+                    b.HasBaseType("MobileFueling.Model.ApplicationUser");
+
+                    b.HasDiscriminator().HasValue("Manager");
+                });
+
+            modelBuilder.Entity("MobileFueling.Model.SystemAdmin", b =>
+                {
+                    b.HasBaseType("MobileFueling.Model.ApplicationUser");
+
+                    b.HasDiscriminator().HasValue("SystemAdmin");
                 });
 
             modelBuilder.Entity("MobileFueling.Model.ApplicationRoleClaim", b =>
@@ -374,14 +404,19 @@ namespace MobileFueling.DB.Migrations
 
             modelBuilder.Entity("MobileFueling.Model.ClientOrderDetalization", b =>
                 {
+                    b.HasOne("MobileFueling.Model.Client", "Client")
+                        .WithMany()
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("MobileFueling.Model.FuelType", "FuelType")
                         .WithMany()
                         .HasForeignKey("FuelTypeId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("MobileFueling.Model.Order", "Order")
-                        .WithOne("ClientDetalization")
-                        .HasForeignKey("MobileFueling.Model.ClientOrderDetalization", "OrderId")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
@@ -390,20 +425,12 @@ namespace MobileFueling.DB.Migrations
                     b.HasOne("MobileFueling.Model.Driver", "Driver")
                         .WithMany()
                         .HasForeignKey("DriverId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("MobileFueling.Model.Order", "Order")
-                        .WithMany("DriverDetalizations")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("MobileFueling.Model.Order", b =>
-                {
-                    b.HasOne("MobileFueling.Model.Client", "Client")
                         .WithMany()
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("MobileFueling.Model.OrderStatusHistory", b =>

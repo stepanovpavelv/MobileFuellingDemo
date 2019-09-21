@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <RuntimeFrameworkName>Microsoft.AspNetCore.App</RuntimeFrameworkName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
@@ -19,5 +19,5 @@
     <ProjectReference Include="..\MobileFueling.DB\MobileFueling.DB.csproj" />
     <ProjectReference Include="..\MobileFueling.ViewModel\MobileFueling.ViewModel.csproj" />
   </ItemGroup>
-
+ 
 </Project>

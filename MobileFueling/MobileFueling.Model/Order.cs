@@ -6,9 +6,9 @@ namespace MobileFueling.Model
     {
         public long Id { get; set; }
         public string Number { get; set; }
-        public long ClientId { get; set; }
-        public Client Client { get; set; }
-        public virtual ClientOrderDetalization ClientDetalization { get; set; }
-        public virtual ICollection<DriverOrderDetalization> DriverDetalizations { get; set; }
+        //public long ClientId { get; set; }
+        //public Client Client { get; set; }
+        //public long ClientDetalizationId { get; set; }
+        //public ClientOrderDetalization ClientDetalization { get; set; }
     }
 }

@@ -1,6 +1,9 @@
-﻿using MobileFueling.Model;
+﻿using Microsoft.AspNetCore.Identity;
+using MobileFueling.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace MobileFueling.DB
 {
@@ -9,9 +12,30 @@ namespace MobileFueling.DB
     /// </summary>
     public static class FuelInitializer
     {
-        public static void InitializePredefinedData(FuelDbContext context)
+        public static void InitializePredefinedData(UserManager<ApplicationUser> userManager, FuelDbContext context)
         {
+            InitializeAdminUsers(userManager, context);
+
             InitializeFuelTypes(context);
+        }
+
+        private static void InitializeAdminUsers(UserManager<ApplicationUser> userManager, FuelDbContext context)
+        {
+            if (context.AdminUsers.Any())
+                return;
+
+            const string email = "MobileFuelAdmin@mail.ru";
+            const string password = "xsa3RhsJ8B";
+            var adminUser = new SystemAdmin
+            {
+                Email = email,
+                UserName = email,
+                SecurityStamp = Guid.NewGuid().ToString()
+            };
+
+            Task adminDelegate() => userManager.CreateAsync(adminUser, password);
+            var adminTask = Task.Factory.StartNew(adminDelegate).Unwrap();
+            adminTask.Wait();
         }
 
         private static void InitializeFuelTypes(FuelDbContext context)

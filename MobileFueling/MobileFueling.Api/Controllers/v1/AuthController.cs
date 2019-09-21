@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
@@ -35,7 +34,6 @@ namespace MobileFueling.Api.Controllers.v1
         /// <returns>Имя созданного пользователя или сообщение об ошибке</returns>
         /// <response code="200">Возвращает имя созданного пользователя</response>
         /// <response code="400">Возвращает, если модель была null</response>
-        [Authorize]
         [Route("register")]
         [HttpPost]
         [ProducesResponseType(200)]

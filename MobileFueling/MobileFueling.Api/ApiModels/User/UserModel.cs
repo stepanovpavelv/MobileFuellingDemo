@@ -45,7 +45,8 @@ namespace MobileFueling.Api.ApiModels.User
         {
             var response = new RegisterResponse();
 
-            if (currentUser is Client || currentUser is Driver || (currentUser is Manager && applicationUser is SystemAdmin))
+            if (((currentUser == null || currentUser is Client || currentUser is Driver) && (applicationUser is SystemAdmin || applicationUser is Manager)) ||
+                 (currentUser is Manager && applicationUser is SystemAdmin))
             {
                 response.AddError(_stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_ADD_OR_UPDATE_USER]);
                 return response;

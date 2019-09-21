@@ -124,7 +124,7 @@ namespace MobileFueling.Api
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, FuelDbContext context)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, UserManager<ApplicationUser> userManager, FuelDbContext context)
         {
             if (env.IsDevelopment())
             {
@@ -171,7 +171,7 @@ namespace MobileFueling.Api
                 routes.MapRoute("userTypeRoute", string.Concat("api/", DEFAULT_VERSION, "/user/{userType}"));
             });
 
-            FuelInitializer.InitializePredefinedData(context);
+            FuelInitializer.InitializePredefinedData(userManager, context);
         }
 
         private int SetFuelContextOptions(IServiceCollection services)

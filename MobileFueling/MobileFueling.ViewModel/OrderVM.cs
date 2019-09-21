@@ -11,8 +11,6 @@ namespace MobileFueling.ViewModel
 
         public string Number { get; set; }
 
-        public long ClientId { get; set; }
-
         public ClientDetalizationVM ClientDetalization { get; set; }
 
         public IEnumerable<DriverDetalizationVM> DriverDetalizations { get; set; }
@@ -25,6 +23,8 @@ namespace MobileFueling.ViewModel
     /// </summary>
     public class ClientDetalizationVM
     {
+        public long ClientId { get; set; }
+
         public System.DateTime CreationDate { get; set; }
 
         public string Address { get; set; }

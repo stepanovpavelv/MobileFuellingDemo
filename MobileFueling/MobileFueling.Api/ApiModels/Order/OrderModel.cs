@@ -138,7 +138,6 @@ namespace MobileFueling.Api.ApiModels.Order
             {
                 order.Number = OrderNumberGenerator.GetNumber(_fuelContext);
             }
-            order.ClientId = request.ClientId;
 
             ClientOrderDetalization clientDetalization = null;
             if (request.Id.HasValue)
@@ -153,6 +152,7 @@ namespace MobileFueling.Api.ApiModels.Order
             {
                 clientDetalization.CreationDate = DateTime.Now;
             }
+            clientDetalization.ClientId = request.ClientId;
             clientDetalization.Address = request.Address;
             clientDetalization.FuelTypeId = request.FuelTypeId;
             clientDetalization.Latitude = request.Latitude;
@@ -282,9 +282,9 @@ namespace MobileFueling.Api.ApiModels.Order
             {
                 Id = order.Id,
                 Number = order.Number,
-                ClientId = order.ClientId,
                 ClientDetalization = new ClientDetalizationVM
                 {
+                    ClientId = clientDetalization.ClientId,
                     Address = clientDetalization.Address,
                     Latitude = clientDetalization.Latitude,
                     Longitude = clientDetalization.Longitude,

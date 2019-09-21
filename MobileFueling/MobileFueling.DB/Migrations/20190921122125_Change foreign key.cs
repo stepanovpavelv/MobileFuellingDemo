@@ -1,10 +1,10 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace MobileFueling.DB.Migrations
 {
-    public partial class Initialmobilefuelling : Migration
+    public partial class Changeforeignkey : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -13,7 +13,7 @@ namespace MobileFueling.DB.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(maxLength: 256, nullable: true),
                     NormalizedName = table.Column<string>(maxLength: 256, nullable: true),
                     ConcurrencyStamp = table.Column<string>(nullable: true)
@@ -28,7 +28,7 @@ namespace MobileFueling.DB.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     UserName = table.Column<string>(maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(maxLength: 256, nullable: true),
                     Email = table.Column<string>(maxLength: 256, nullable: true),
@@ -55,7 +55,7 @@ namespace MobileFueling.DB.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(maxLength: 50, nullable: true)
                 },
                 constraints: table =>
@@ -64,11 +64,24 @@ namespace MobileFueling.DB.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Orders",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Number = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Orders", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     RoleId = table.Column<long>(nullable: false),
                     ClaimType = table.Column<string>(nullable: true),
                     ClaimValue = table.Column<string>(nullable: true)
@@ -89,7 +102,7 @@ namespace MobileFueling.DB.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     UserId = table.Column<long>(nullable: false),
                     ClaimType = table.Column<string>(nullable: true),
                     ClaimValue = table.Column<string>(nullable: true)
@@ -170,30 +183,11 @@ namespace MobileFueling.DB.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Orders",
-                columns: table => new
-                {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
-                    ClientId = table.Column<long>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Orders", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Orders_AspNetUsers_ClientId",
-                        column: x => x.ClientId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Cars",
                 columns: table => new
                 {
                     Id = table.Column<long>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Description = table.Column<string>(maxLength: 200, nullable: true),
                     FuelTypeId = table.Column<long>(nullable: false),
                     IsDefault = table.Column<bool>(nullable: false),
@@ -221,10 +215,11 @@ namespace MobileFueling.DB.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    ClientId = table.Column<long>(nullable: false),
                     OrderId = table.Column<long>(nullable: false),
                     CreationDate = table.Column<DateTime>(nullable: false),
-                    Quantity = table.Column<decimal>(nullable: false),
+                    Quantity = table.Column<decimal>(type: "decimal(7,2)", nullable: false),
                     FuelTypeId = table.Column<long>(nullable: false),
                     Latitude = table.Column<decimal>(type: "decimal(10,6)", nullable: true),
                     Longitude = table.Column<decimal>(type: "decimal(10,6)", nullable: true),
@@ -233,6 +228,12 @@ namespace MobileFueling.DB.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ClientOrderDetalizations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ClientOrderDetalizations_AspNetUsers_ClientId",
+                        column: x => x.ClientId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_ClientOrderDetalizations_FuelTypes_FuelTypeId",
                         column: x => x.FuelTypeId,
@@ -252,7 +253,7 @@ namespace MobileFueling.DB.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     OrderId = table.Column<long>(nullable: false),
                     DriverId = table.Column<long>(nullable: false),
                     ReceiptDate = table.Column<DateTime>(nullable: false)
@@ -265,13 +266,13 @@ namespace MobileFueling.DB.Migrations
                         column: x => x.DriverId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_DriverOrderDetalizations_Orders_OrderId",
                         column: x => x.OrderId,
                         principalTable: "Orders",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -279,7 +280,8 @@ namespace MobileFueling.DB.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    ChangeTime = table.Column<DateTime>(nullable: false),
                     OrderId = table.Column<long>(nullable: false),
                     Status = table.Column<int>(nullable: false)
                 },
@@ -294,19 +296,6 @@ namespace MobileFueling.DB.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.InsertData(
-                table: "FuelTypes",
-                columns: new[] { "Id", "Name" },
-                values: new object[,]
-                {
-                    { 1L, "АИ-80" },
-                    { 2L, "АИ-92" },
-                    { 3L, "АИ-95" },
-                    { 4L, "АИ-98" },
-                    { 5L, "Дизель" },
-                    { 6L, "Газ" }
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -316,7 +305,8 @@ namespace MobileFueling.DB.Migrations
                 name: "RoleNameIndex",
                 table: "AspNetRoles",
                 column: "NormalizedName",
-                unique: true);
+                unique: true,
+                filter: "[NormalizedName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserClaims_UserId",
@@ -342,7 +332,8 @@ namespace MobileFueling.DB.Migrations
                 name: "UserNameIndex",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
-                unique: true);
+                unique: true,
+                filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Cars_ClientId",
@@ -355,6 +346,11 @@ namespace MobileFueling.DB.Migrations
                 column: "FuelTypeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ClientOrderDetalizations_ClientId",
+                table: "ClientOrderDetalizations",
+                column: "ClientId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ClientOrderDetalizations_FuelTypeId",
                 table: "ClientOrderDetalizations",
                 column: "FuelTypeId");
@@ -362,8 +358,7 @@ namespace MobileFueling.DB.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_ClientOrderDetalizations_OrderId",
                 table: "ClientOrderDetalizations",
-                column: "OrderId",
-                unique: true);
+                column: "OrderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DriverOrderDetalizations_DriverId",
@@ -374,11 +369,6 @@ namespace MobileFueling.DB.Migrations
                 name: "IX_DriverOrderDetalizations_OrderId",
                 table: "DriverOrderDetalizations",
                 column: "OrderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Orders_ClientId",
-                table: "Orders",
-                column: "ClientId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderStatusesHistory_OrderId",
@@ -422,10 +412,10 @@ namespace MobileFueling.DB.Migrations
                 name: "FuelTypes");
 
             migrationBuilder.DropTable(
-                name: "Orders");
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Orders");
         }
     }
 }
