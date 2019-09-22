@@ -46,7 +46,7 @@ namespace MobileFueling.Api.Controllers.v1
         /// </summary>
         /// <param name="userType">Тип пользователя</param>
         /// <param name="id">Идентификатор пользователя</param>
-        /// <returns></returns>
+        /// <returns>Информация по пользователю</returns>
         [HttpGet("{id}", Name = "GetUser")]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
@@ -54,6 +54,20 @@ namespace MobileFueling.Api.Controllers.v1
         {
             var currentUser = await _userManager.GetUserAsync(User);
             return await _userModel.GetOne(currentUser, userType, id);
+        }
+
+        /// <summary>
+        /// Получение информации по текущему пользователю
+        /// </summary>
+        /// <returns>Информация по пользователю</returns>
+        [Route("~/api/v1/[controller]/meta")]
+        [HttpGet()]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(401)]
+        public async Task<UserGetOneResponse> Get()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            return await _userModel.GetOne(currentUser);
         }
 
         /// <summary>

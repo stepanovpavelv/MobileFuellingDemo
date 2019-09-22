@@ -270,6 +270,22 @@ namespace MobileFueling.Api.ApiModels.User
             return response;
         }
 
+        public async Task<UserGetOneResponse> GetOne(ApplicationUser currentUser)
+        {
+            var response = new UserGetOneResponse();
+
+            if (currentUser != null)
+            {
+                response.Item = await Convert(currentUser);
+            }
+            else
+            {
+                response.AddError(_stringLocalizer[CustomStringLocalizer.USER_NOT_FOUND]);
+            }
+
+            return response;
+        }
+
         public async Task<UserUpdateResponse> PostOne(ApplicationUser currentUser, UserTypeVM userType, ApplicationUserVM applicationUserVM)
         {
             var response = new UserUpdateResponse();

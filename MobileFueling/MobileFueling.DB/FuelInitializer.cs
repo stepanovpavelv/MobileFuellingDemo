@@ -33,9 +33,16 @@ namespace MobileFueling.DB
                 SecurityStamp = Guid.NewGuid().ToString()
             };
 
-            Task adminDelegate() => userManager.CreateAsync(adminUser, password);
+            Task<IdentityResult> adminDelegate() => userManager.CreateAsync(adminUser, password);
             var adminTask = Task.Factory.StartNew(adminDelegate).Unwrap();
             adminTask.Wait();
+
+            if (adminTask.Result.Succeeded)
+            {
+                Task adminCanLoginDelegate() => userManager.AddClaimAsync(adminUser, new System.Security.Claims.Claim("CanLogin", "1"));
+                var adminClaimTask = Task.Factory.StartNew(adminCanLoginDelegate).Unwrap();
+                adminClaimTask.Wait();
+            }
         }
 
         private static void InitializeFuelTypes(FuelDbContext context)
