@@ -1,6 +1,6 @@
 ﻿using MobileFueling.Api.Common.BaseResponseResources;
 
-namespace MobileFueling.Api.Contract
+namespace MobileFueling.Api.Contract.Auth
 {
     public class RegisterResponse : BaseResponse
     {

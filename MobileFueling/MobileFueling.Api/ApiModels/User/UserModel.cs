@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
+using MobileFueling.Api.Common.BaseResponseResources;
 using MobileFueling.Api.Common.Localization;
 using MobileFueling.Api.Common.Settings;
-using MobileFueling.Api.Contract;
+using MobileFueling.Api.Contract.Auth;
 using MobileFueling.Api.Contract.UserData;
 using MobileFueling.DB;
 using MobileFueling.Model;
@@ -132,6 +133,14 @@ namespace MobileFueling.Api.ApiModels.User
                 response.AddException(ex);
             }
 
+            return response;
+        }
+
+        internal T CreateBadResponse<T>(ModelStateDictionary modelState) where T: BaseResponse, new()
+        {
+            T response = new T();
+            response.AddError(_stringLocalizer[CustomStringLocalizer.INCORRECT_MODEL]);
+            response.AddError(new LocalizedString("Errors", modelState.Values.SelectMany(x => x.Errors).Select(e => e.ErrorMessage).Aggregate((a, b) => string.Join(a, ";", b))));
             return response;
         }
         

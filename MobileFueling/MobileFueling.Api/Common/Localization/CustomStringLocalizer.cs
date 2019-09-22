@@ -26,6 +26,7 @@ namespace MobileFueling.Api.Common.Localization
         public const string NO_RIGHTS_TO_ASSIGN_DRIVER = nameof(NO_RIGHTS_TO_ASSIGN_DRIVER);
         public const string USER_CAN_NOT_ASSIGN_DRIVER_COMPLETED_ORDER = nameof(USER_CAN_NOT_ASSIGN_DRIVER_COMPLETED_ORDER);
         public const string NO_RIGHTS_TO_CANCEL_ORDER = nameof(NO_RIGHTS_TO_CANCEL_ORDER);
+        public const string INCORRECT_MODEL = nameof(INCORRECT_MODEL);
 
         public CustomStringLocalizer()
         {
@@ -46,7 +47,8 @@ namespace MobileFueling.Api.Common.Localization
                 {ORDERS_NOT_FOUND, "Can not find any orders by sent request" },
                 {NO_RIGHTS_TO_ASSIGN_DRIVER, "User has no rights to assign driver" },
                 {USER_CAN_NOT_ASSIGN_DRIVER_COMPLETED_ORDER, "User can not assign driver on completed order" },
-                {NO_RIGHTS_TO_CANCEL_ORDER, "User has no rights to cancel order" }
+                {NO_RIGHTS_TO_CANCEL_ORDER, "User has no rights to cancel order" },
+                {INCORRECT_MODEL, "This model is incorrect" }
             };
             var ruDict = new Dictionary<string, string>
             {
@@ -65,7 +67,8 @@ namespace MobileFueling.Api.Common.Localization
                 {ORDERS_NOT_FOUND, "Невозможно найти заказы по данному запросу" },
                 {NO_RIGHTS_TO_ASSIGN_DRIVER, "Нет прав на назначение водителя" },
                 {USER_CAN_NOT_ASSIGN_DRIVER_COMPLETED_ORDER, "Невозможно назначить водителя на уже завершенный заказ" },
-                {NO_RIGHTS_TO_CANCEL_ORDER, "Нет прав на отмену заказа" }
+                {NO_RIGHTS_TO_CANCEL_ORDER, "Нет прав на отмену заказа" },
+                {INCORRECT_MODEL, "Модель невалидна" }
             };
 
             _resources = new Dictionary<string, Dictionary<string, string>>

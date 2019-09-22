@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace MobileFueling.Api.Controllers.v1
 {
-    [Authorize]
     [Produces("application/json")]
     [Route("api/v1/[controller]")]
     [ApiController]
@@ -39,6 +38,7 @@ namespace MobileFueling.Api.Controllers.v1
         /// </summary>
         /// <param name="id">Идентификатор типа топлива</param>
         /// <returns>Тип топлива</returns>
+        [Authorize]
         [HttpGet("{id}", Name = "GetFuelType")]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
@@ -52,6 +52,7 @@ namespace MobileFueling.Api.Controllers.v1
         /// </summary>
         /// <param name="value">Тип топлива</param>
         /// <returns>Идентификатор</returns>
+        [Authorize]
         [HttpPost]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
@@ -64,6 +65,7 @@ namespace MobileFueling.Api.Controllers.v1
         /// Удаление типа топлива
         /// </summary>
         /// <param name="id">Идентификатор</param>
+        [Authorize]
         [HttpDelete("{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]

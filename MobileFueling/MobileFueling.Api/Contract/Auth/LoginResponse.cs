@@ -1,9 +1,7 @@
 ﻿using MobileFueling.Api.Common.BaseResponseResources;
-using MobileFueling.ViewModel;
 using System;
-using System.IdentityModel.Tokens.Jwt;
 
-namespace MobileFueling.Api.Contract
+namespace MobileFueling.Api.Contract.Auth
 {
     public class LoginResponse : BaseResponse
     {

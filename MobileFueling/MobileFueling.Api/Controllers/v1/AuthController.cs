@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using MobileFueling.Api.ApiModels;
 using MobileFueling.Api.ApiModels.User;
+using MobileFueling.Api.Contract.Auth;
 using MobileFueling.Model;
 using MobileFueling.ViewModel;
 using System.Threading.Tasks;
@@ -38,14 +39,14 @@ namespace MobileFueling.Api.Controllers.v1
         [HttpPost]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> AddUser([FromBody] RegisterViewModel viewModel)
+        public async Task<RegisterResponse> AddUser([FromBody] RegisterViewModel viewModel)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return _userModel.CreateBadResponse<RegisterResponse>(ModelState);
 
             var currentUser = await _userManager.GetUserAsync(User);
             var applicationUser = ApplicationUserFactory.CreateApplicationUser(viewModel);
-            return Ok(await _userModel.SaveUserAccountAsync(applicationUser, currentUser, viewModel));
+            return await _userModel.SaveUserAccountAsync(applicationUser, currentUser, viewModel);
         }
 
         /// <summary>
@@ -59,12 +60,12 @@ namespace MobileFueling.Api.Controllers.v1
         [HttpPost]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> GetUser([FromBody] LoginViewModel viewModel)
+        public async Task<LoginResponse> GetUser([FromBody] LoginViewModel viewModel)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return _userModel.CreateBadResponse<LoginResponse>(ModelState);
 
-            return Ok(await _userModel.GetUserAsync(_configuration, viewModel));
+            return await _userModel.GetUserAsync(_configuration, viewModel);
         }
     }
 }
