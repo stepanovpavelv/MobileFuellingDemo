@@ -115,7 +115,12 @@ namespace MobileFueling.Api.ApiModels.FuelType
             if (fuelType == null)
                 return null;
 
-            var lastPrice = _fuelContext.FuelPrices.OrderBy(x => x.ChangedDate).LastOrDefault();
+            var lastPrice = _fuelContext.FuelPrices
+                .AsNoTracking()
+                .Where(x => x.FuelTypeId == fuelType.Id)
+                .OrderBy(x => x.ChangedDate)
+                .LastOrDefault();
+
             return new FuelTypeVM
             {
                 Id = fuelType.Id,
