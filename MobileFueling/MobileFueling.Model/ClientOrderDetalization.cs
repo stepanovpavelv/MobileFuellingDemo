@@ -14,5 +14,7 @@
         public float? Latitude { get; set; }
         public float? Longitude { get; set; }
         public string Address { get; set; }
+        public decimal FuelPrice { get; set; }
+        public decimal Cost { get; set; }
     }
 }

@@ -17,6 +17,7 @@ namespace MobileFueling.DB
         }
 
         public DbSet<FuelType> FuelTypes { get; set; }
+        public DbSet<FuelPrice> FuelPrices { get; set; }
         public DbSet<SystemAdmin> AdminUsers { get; set; }
         public DbSet<Driver> DriverUsers { get; set; }
         public DbSet<Client> ClientUsers { get; set; }

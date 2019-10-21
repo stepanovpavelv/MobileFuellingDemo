@@ -4,6 +4,7 @@ using MobileFueling.Api.Common.Localization;
 using MobileFueling.Api.Contract.FuelType;
 using MobileFueling.DB;
 using MobileFueling.ViewModel;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -85,15 +86,41 @@ namespace MobileFueling.Api.ApiModels.FuelType
             return response;
         }
 
+        public async Task<FuelTypePutOneResponse> PutOne(long id, FuelTypePutOneRequest request)
+        {
+            var response = new FuelTypePutOneResponse();
+
+            var item = await _fuelContext.FuelTypes.FirstOrDefaultAsync(x => x.Id == id);
+            if (item == null)
+            {
+                response.AddError(_stringLocalizer[CustomStringLocalizer.FUEL_TYPE_CAN_NOT_FIND]);
+                return response;
+            }
+
+            await _fuelContext.FuelPrices.AddAsync(
+                new Model.FuelPrice
+                {
+                    FuelTypeId = id,
+                    ChangedDate = request.ChangedDate ?? DateTime.Now,
+                    Price = request.Price
+                });
+            await _fuelContext.SaveChangesAsync();
+
+            response.Item = Convert(item);
+            return response;
+        }
+
         private FuelTypeVM Convert(Model.FuelType fuelType)
         {
             if (fuelType == null)
                 return null;
 
+            var lastPrice = _fuelContext.FuelPrices.OrderBy(x => x.ChangedDate).LastOrDefault();
             return new FuelTypeVM
             {
                 Id = fuelType.Id,
-                Name = fuelType.Name
+                Name = fuelType.Name,
+                Price = lastPrice?.Price
             };
         }
     }

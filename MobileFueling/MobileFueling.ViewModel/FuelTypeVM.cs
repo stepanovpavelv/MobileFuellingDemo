@@ -15,5 +15,9 @@ namespace MobileFueling.ViewModel
         /// Наименование типа топлива
         /// </summary>
         public string Name { get; set; }
+        /// <summary>
+        /// Цена за литр топлива
+        /// </summary>
+        public decimal? Price { get; set; }
     }
 }

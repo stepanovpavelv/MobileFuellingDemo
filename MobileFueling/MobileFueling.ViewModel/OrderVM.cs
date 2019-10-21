@@ -31,6 +31,10 @@ namespace MobileFueling.ViewModel
 
         public decimal Quantity { get; set; }
 
+        public decimal Price { get; set; }
+
+        public decimal Cost { get; set; }
+
         public FuelTypeVM FuelType { get; set; }
 
         public float? Latitude { get; set; }

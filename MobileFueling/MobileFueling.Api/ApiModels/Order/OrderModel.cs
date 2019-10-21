@@ -158,6 +158,8 @@ namespace MobileFueling.Api.ApiModels.Order
             clientDetalization.Latitude = request.Latitude;
             clientDetalization.Longitude = request.Longitude;
             clientDetalization.Quantity = request.Quantity;
+            clientDetalization.FuelPrice = request.Price;
+            clientDetalization.Cost = request.Price * request.Quantity;
 
             if (request.Id.HasValue)
             {
@@ -289,6 +291,8 @@ namespace MobileFueling.Api.ApiModels.Order
                     Latitude = clientDetalization.Latitude,
                     Longitude = clientDetalization.Longitude,
                     Quantity = clientDetalization.Quantity,
+                    Price = clientDetalization.FuelPrice,
+                    Cost = clientDetalization.Cost,
                     CreationDate = clientDetalization.CreationDate,
                     FuelType = new FuelTypeVM
                     {

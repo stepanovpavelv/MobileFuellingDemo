@@ -13,6 +13,8 @@
 
         public decimal Quantity { get; set; }
 
+        public decimal Price { get; set; }
+
         public long FuelTypeId { get; set; }
 
         public float? Latitude { get; set; }
