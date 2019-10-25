@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MobileFueling.DB;
 
 namespace MobileFueling.DB.Migrations
 {
     [DbContext(typeof(FuelDbContext))]
-    partial class FuelDbContextModelSnapshot : ModelSnapshot
+    [Migration("20191025172658_add client phone to order")]
+    partial class addclientphonetoorder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

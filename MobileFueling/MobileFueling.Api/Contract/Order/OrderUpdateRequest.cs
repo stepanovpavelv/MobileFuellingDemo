@@ -7,7 +7,9 @@
     {
         public long? Id { get; set; }
 
-        public long ClientId { get; set; }
+        public long? ClientId { get; set; }
+
+        public string ClientPhone { get; set; }
 
         public string Address { get; set; }
 

@@ -153,6 +153,7 @@ namespace MobileFueling.Api.ApiModels.Order
                 clientDetalization.CreationDate = DateTime.Now;
             }
             clientDetalization.ClientId = request.ClientId;
+            clientDetalization.ClientPhone = request.ClientPhone;
             clientDetalization.Address = request.Address;
             clientDetalization.FuelTypeId = request.FuelTypeId;
             clientDetalization.Latitude = request.Latitude;
@@ -287,6 +288,7 @@ namespace MobileFueling.Api.ApiModels.Order
                 ClientDetalization = new ClientDetalizationVM
                 {
                     ClientId = clientDetalization.ClientId,
+                    ClientPhone = clientDetalization.ClientPhone,
                     Address = clientDetalization.Address,
                     Latitude = clientDetalization.Latitude,
                     Longitude = clientDetalization.Longitude,
