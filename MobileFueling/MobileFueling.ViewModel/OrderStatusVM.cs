@@ -11,6 +11,8 @@ namespace MobileFueling.ViewModel
         [Description("Завершен")]
         Completed,
         [Description("Аннулирован")]
-        Cancelled
+        Cancelled,
+        [Description("Оплачен")]
+        Paid
     }
 }

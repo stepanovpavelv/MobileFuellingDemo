@@ -17,5 +17,6 @@
         public string Address { get; set; }
         public decimal FuelPrice { get; set; }
         public decimal Cost { get; set; }
+        public string PaymentIdempotenceKey { get; set; }
     }
 }
