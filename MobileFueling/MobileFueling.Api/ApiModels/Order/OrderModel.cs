@@ -128,8 +128,8 @@ namespace MobileFueling.Api.ApiModels.Order
             var response = new OrderUpdateResponse();
             Model.Order order = null;
 
-            if (!(currentUser is Client) ||
-                currentUser == null && string.IsNullOrEmpty(request.ClientPhone)) // только клиент может добавлять заказ (или по номеру телефону)
+            if((currentUser == null && string.IsNullOrEmpty(request.ClientPhone)) ||
+               (currentUser != null && !(currentUser is Client))) // только клиент может добавлять заказ (или по номеру телефону)
             {
                 response.AddError(_stringLocalizer[CustomStringLocalizer.NO_RIGHTS_TO_CREATE_UPDATE_ORDER]);
                 return response;

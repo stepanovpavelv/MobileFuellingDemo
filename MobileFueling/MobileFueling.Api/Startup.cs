@@ -20,6 +20,8 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using Hangfire;
+using Hangfire.MemoryStorage;
 
 namespace MobileFueling.Api
 {
@@ -49,6 +51,9 @@ namespace MobileFueling.Api
             var healthConnectionString = _configuration["ConnectionStrings:HealthConnection"];
             services.AddHealthChecks()
                 .AddCheck("Database App", new SqlConnectionHealthCheck(healthConnectionString, sqlType));
+
+            // очереди задач
+            services.AddHangfire(c => c.UseMemoryStorage());
 
             // локализация
             services.AddTransient<IStringLocalizer, CustomStringLocalizer>();
@@ -137,6 +142,9 @@ namespace MobileFueling.Api
             }
 
             app.UseHealthChecks("/healthcheck");
+
+            app.UseHangfireServer();
+            app.UseHangfireDashboard("/hangfire");
 
             var supportedCultures = new[]
             {
