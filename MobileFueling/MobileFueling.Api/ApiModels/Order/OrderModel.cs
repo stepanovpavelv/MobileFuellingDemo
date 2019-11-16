@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
@@ -23,6 +24,7 @@ namespace MobileFueling.Api.ApiModels.Order
         private readonly FuelDbContext _fuelContext;
         private readonly IStringLocalizer _stringLocalizer;
         private readonly ILogger<OrderModel> _logger;
+        private readonly IConfiguration _configuration;
         
         private static HttpClientHandler _httpClientHandler = new HttpClientHandler
         {
@@ -31,11 +33,12 @@ namespace MobileFueling.Api.ApiModels.Order
         };
         private static HttpClient _httpClient = new HttpClient(_httpClientHandler);
 
-        public OrderModel(FuelDbContext fuelContext, IStringLocalizer stringLocalizer, ILogger<OrderModel> logger)
+        public OrderModel(FuelDbContext fuelContext, IStringLocalizer stringLocalizer, IConfiguration configuration, ILogger<OrderModel> logger)
         {
             _fuelContext = fuelContext;
             _stringLocalizer = stringLocalizer;
             _logger = logger;
+            _configuration = configuration;
         }
 
         public async Task<OrderGetAllResponse> GetAll(ApplicationUser currentUser, OrderGetAllRequest request)
@@ -209,7 +212,14 @@ namespace MobileFueling.Api.ApiModels.Order
             if (currentOrderStatus != null && currentOrderStatus.Status == Model.Enums.OrderStatus.Created)
             {
                 // отправить запрос на создание платежа в яндекс.кассе
-                response.PaymentLink = await CreatePaymentAsync(configuration, order.Number, clientDetalization);
+                var yandexResponse = await CreatePaymentAsync(order.Number, clientDetalization);
+                if (yandexResponse != null)
+                {
+                    response.PaymentLink = yandexResponse.Confirmation?.ConfirmationUrl;
+
+                    // повторяющаяся таска до тех пор, пока не станет ясен статус заказа (оплачен/отменен)
+                    BackgroundJob.Schedule(() => CheckPaymentProcessingAsync(order.Id, yandexResponse.Id), TimeSpan.FromSeconds(15.0));
+                }
             }
 
             response.Id = order.Id;
@@ -297,21 +307,20 @@ namespace MobileFueling.Api.ApiModels.Order
             await _fuelContext.SaveChangesAsync();
         }
 
-        private async Task<string> CreatePaymentAsync(IConfiguration configuration, string orderNumber, ClientOrderDetalization clientDetalization)
+        private async Task<GetYandexPaymentLinkResponse> CreatePaymentAsync(string orderNumber, ClientOrderDetalization clientDetalization)
         {
-            var createPaymentUrl = string.Concat(configuration["PaymentCashOptions:APIEndpoint"], configuration["PaymentCashOptions:CreatePaymentMethod"]);
+            var createPaymentUrl = string.Concat(_configuration["PaymentCashOptions:APIEndpoint"], _configuration["PaymentCashOptions:CreatePaymentMethod"]);
             var supplierRequest = new GetYandexPaymentLinkRequest
             {
                 Amount = new PaymentAmount { Value = clientDetalization.Cost },
-                Confirmation = new PaymentReturn { ReturnUrl = configuration["PaymentCashOptions:ReturnUrl"] },
+                Confirmation = new PaymentReturn { ReturnUrl = _configuration["PaymentCashOptions:ReturnUrl"] },
                 Description = $"Оплата заказа №{orderNumber}"
             };
             var strSupplierRequest = JsonConvert.SerializeObject(supplierRequest);
             var strSupplierResponse = string.Empty;
-            var confirmationUrl = string.Empty;
             try
             {
-                var credentials = Encoding.ASCII.GetBytes($"{configuration["PaymentCashOptions:ShopId"]}:{configuration["PaymentCashOptions:SecretKey"]}");
+                var credentials = Encoding.ASCII.GetBytes($"{_configuration["PaymentCashOptions:ShopId"]}:{_configuration["PaymentCashOptions:SecretKey"]}");
                 _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", System.Convert.ToBase64String(credentials));
                 _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
                 _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Idempotence-Key", clientDetalization.PaymentIdempotenceKey);
@@ -322,8 +331,7 @@ namespace MobileFueling.Api.ApiModels.Order
                     strSupplierResponse = await response.Content.ReadAsStringAsync();
                     if (response.StatusCode == System.Net.HttpStatusCode.OK)
                     {
-                        var supplierResponse = JsonConvert.DeserializeObject<GetYandexPaymentLinkResponse>(strSupplierResponse);
-                        confirmationUrl = supplierResponse.Confirmation.ConfirmationUrl;
+                        return JsonConvert.DeserializeObject<GetYandexPaymentLinkResponse>(strSupplierResponse);
                     }
                     else
                     {
@@ -337,7 +345,62 @@ namespace MobileFueling.Api.ApiModels.Order
                 _logger.LogError(ex, GetFatalPaymentMessage(System.Net.HttpStatusCode.InternalServerError, strSupplierRequest, strSupplierResponse));
             } 
 
-            return confirmationUrl;
+            // иначе была ошибка, и она была залоггирована
+            return null;
+        }
+
+        /// <summary>
+        /// Проверка с определенной периодичностью статуса заказа 
+        /// </summary>
+        /// <param name="orderId">Идентификатор заказа</param>
+        /// <param name="paymentId">Идентификатор заказа</param>
+        /// <returns>Задача</returns>
+        public async Task CheckPaymentProcessingAsync(long orderId, string paymentId)
+        {
+            GetYandexPaymentStatusResponse supplierStatusResponse = null;
+
+            var statusPaymentRequestUrl = string.Concat(_configuration["PaymentCashOptions:APIEndpoint"], _configuration["PaymentCashOptions:CreatePaymentMethod"],$"/{paymentId}");
+            var strSupplierResponse = string.Empty;
+            try
+            {
+                var credentials = Encoding.ASCII.GetBytes($"{_configuration["PaymentCashOptions:ShopId"]}:{_configuration["PaymentCashOptions:SecretKey"]}");
+                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", System.Convert.ToBase64String(credentials));
+                _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
+
+                using (var response = await _httpClient.GetAsync(statusPaymentRequestUrl))
+                {
+                    strSupplierResponse = await response.Content.ReadAsStringAsync();
+                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        supplierStatusResponse = JsonConvert.DeserializeObject<GetYandexPaymentStatusResponse>(strSupplierResponse);
+                    }
+                    else
+                    {
+                        // логгируем некорректный ответ
+                        _logger.LogError(GetFatalPaymentMessage(response.StatusCode, statusPaymentRequestUrl, strSupplierResponse));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, GetFatalPaymentMessage(System.Net.HttpStatusCode.InternalServerError, statusPaymentRequestUrl, strSupplierResponse));
+            }
+
+            if (supplierStatusResponse != null && supplierStatusResponse.Paid)
+            {
+                // установить для заказа статус "Оплачен"
+                await AddStatusToHistory(orderId, OrderStatusVM.Paid);
+            }
+            else if(supplierStatusResponse != null && supplierStatusResponse.Status == "cancelled")
+            {
+                // установить для заказа статус "Отменен"
+                await AddStatusToHistory(orderId, OrderStatusVM.Cancelled);
+            }
+            else
+            {
+                // продолжать ждать "оплаты заказа"
+                BackgroundJob.Schedule(() => CheckPaymentProcessingAsync(orderId, paymentId), TimeSpan.FromSeconds(15.0));
+            }
         }
 
         private string GetFatalPaymentMessage(System.Net.HttpStatusCode status, string strSupplierRequest, string strSupplierResponse)

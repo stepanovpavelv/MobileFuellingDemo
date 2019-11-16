@@ -24,7 +24,7 @@ namespace MobileFueling.Api.Controllers.v1
         public OrderController(UserManager<ApplicationUser> userManager, FuelDbContext fuelContext, IStringLocalizer stringLocalizer, IConfiguration configuration, ILogger<OrderModel> logger)
         {
             _userManager = userManager;
-            _orderModel = new OrderModel(fuelContext, stringLocalizer, logger);
+            _orderModel = new OrderModel(fuelContext, stringLocalizer, configuration, logger);
             _configuration = configuration;
         }
 

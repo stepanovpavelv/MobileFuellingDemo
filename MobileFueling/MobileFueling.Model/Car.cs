@@ -9,5 +9,6 @@
         public bool IsDefault { get; set; }
         public long ClientId { get; set; }
         public Client Client { get; set; }
+        public string RegNumber { get; set; }
     }
 }
