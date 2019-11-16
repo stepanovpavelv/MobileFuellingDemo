@@ -41,9 +41,9 @@ namespace MobileFueling.Api.ApiModels.Order
             _configuration = configuration;
         }
 
-        public async Task<OrderGetAllResponse> GetAll(ApplicationUser currentUser, OrderGetAllRequest request)
+        public async Task<OrderPostAllResponse> PostAll(ApplicationUser currentUser, OrderPostAllRequest request)
         {
-            var response = new OrderGetAllResponse();
+            var response = new OrderPostAllResponse();
 
             var query = _fuelContext.Orders.AsQueryable();
             if (request.Numbers != null && request.Numbers.Any())

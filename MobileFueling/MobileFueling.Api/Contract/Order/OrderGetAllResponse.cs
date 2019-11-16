@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace MobileFueling.Api.Contract.Order
 {
-    public class OrderGetAllResponse : BaseResponse
+    public class OrderPostAllResponse : BaseResponse
     {
         public IEnumerable<OrderVM> Items { get; set; }
     }

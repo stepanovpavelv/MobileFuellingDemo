@@ -33,14 +33,15 @@ namespace MobileFueling.Api.Controllers.v1
         /// </summary>
         /// <param name="request">Запрос (контракт)</param>
         /// <returns>Список заказов</returns>
+        /// <remarks>Обратите внимание, что метод имеет тип Post, т.к. GET/HEAD не может иметь body</remarks>
         [Authorize]
-        [HttpGet]
+        [HttpPost("all", Name = "GetAllOrders")]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
-        public async Task<OrderGetAllResponse> Get(OrderGetAllRequest request)
+        public async Task<OrderPostAllResponse> PostAll([FromBody] OrderPostAllRequest request)
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            return await _orderModel.GetAll(currentUser, request);
+            return await _orderModel.PostAll(currentUser, request);
         }
 
         /// <summary>
@@ -63,7 +64,7 @@ namespace MobileFueling.Api.Controllers.v1
         /// </summary>
         /// <param name="request">Запрос (контракт)</param>
         /// <returns>Заказ</returns>
-        [HttpPost]
+        [HttpPost(Name = "PostOrder")]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
         public async Task<OrderUpdateResponse> Post([FromBody] OrderUpdateRequest request)
