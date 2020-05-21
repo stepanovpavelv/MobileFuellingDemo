@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Hangfire;
+using Hangfire.MemoryStorage;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -9,19 +11,19 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using MobileFueling.Api.Common.HealthChecks;
 using MobileFueling.Api.Common.Localization;
 using MobileFueling.DB;
 using MobileFueling.Model;
-using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Hosting;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using Hangfire;
-using Hangfire.MemoryStorage;
+using System.Text.Json.Serialization;
 
 namespace MobileFueling.Api
 {
@@ -31,7 +33,7 @@ namespace MobileFueling.Api
         private const string DEFAULT_REQUEST_CULTURE = "ru";
         private readonly IConfiguration _configuration;
 
-        public Startup(IHostingEnvironment env)
+        public Startup(IWebHostEnvironment env)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
@@ -95,32 +97,49 @@ namespace MobileFueling.Api
             });
 
             // Add framework services.
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+
+            services.AddControllers()
+                .AddJsonOptions(x =>
+                {
+                    x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
 
             services.AddSwaggerGen(option =>
             {
-                option.SwaggerDoc(DEFAULT_VERSION, new Info
+                option.SwaggerDoc(DEFAULT_VERSION, new OpenApiInfo
                 {
                     Version = DEFAULT_VERSION,
                     Title = "MobileFuelling API",
                     Description = "Examples of MobileFuelling methods Web API"
                 });
 
-                var security = new Dictionary<string, IEnumerable<string>>
+                option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
-                    {"Bearer", new string[] { } }
-                };
-                option.AddSecurityDefinition("Bearer", new ApiKeyScheme
-                {
-                    Type = "apiKey",
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
                     Name = "Authorization",
-                    In = "header",
-                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\""
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
                 });
 
-                option.AddSecurityRequirement(security);
-
-                option.DescribeAllEnumsAsStrings();
+                option.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id= "Bearer"
+                            },
+                            Scheme = "oauth2",
+                            Name = "Bearer",
+                            In = ParameterLocation.Header
+                        },
+                        new List<string>()
+                    }
+                });
 
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
@@ -129,7 +148,7 @@ namespace MobileFueling.Api
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, UserManager<ApplicationUser> userManager, FuelDbContext context)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, UserManager<ApplicationUser> userManager, FuelDbContext context)
         {
             if (env.IsDevelopment())
             {
@@ -170,14 +189,14 @@ namespace MobileFueling.Api
                 option.SwaggerEndpoint(_configuration["SwaggerOptions:UIEndpoint"], _configuration["SwaggerOptions:Description"]);
                 option.RoutePrefix = string.Empty;
             });
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute("defaultapi", string.Concat("api/", DEFAULT_VERSION, "/{controller=Home}/{action=Index}/{id?}"));
+            //app.UseEndpoints(endpoints =>
+            //{
+            //    endpoints.MapControllerRoute("defaultapi", string.Concat("api/", DEFAULT_VERSION, "/{controller=Home}/{action=Index}/{id?}"));
 
-                routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
+            //    endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
 
-                routes.MapRoute("userTypeRoute", string.Concat("api/", DEFAULT_VERSION, "/user/{userType}"));
-            });
+            //    endpoints.MapControllerRoute("userTypeRoute", string.Concat("api/", DEFAULT_VERSION, "/user/{userType}"));
+            //});
 
             FuelInitializer.InitializePredefinedData(userManager, context);
         }
