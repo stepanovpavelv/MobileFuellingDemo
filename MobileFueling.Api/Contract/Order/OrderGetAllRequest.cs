@@ -6,7 +6,7 @@ namespace MobileFueling.Api.Contract.Order
     /// <summary>
     /// Запрос-контракт для получения списка всех заказов
     /// </summary>
-    public class OrderGetAllRequest
+    public class OrderPostAllRequest
     {
         /// <summary>
         /// Дата начала создания заказа

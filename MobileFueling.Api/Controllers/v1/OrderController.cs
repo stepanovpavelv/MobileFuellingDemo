@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using MobileFueling.Api.ApiModels.Order;
 using MobileFueling.Api.Contract.Order;
 using MobileFueling.DB;
@@ -11,18 +13,19 @@ using System.Threading.Tasks;
 
 namespace MobileFueling.Api.Controllers.v1
 {
-    [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
     public class OrderController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly OrderModel _orderModel;
+        private readonly IConfiguration _configuration;
 
-        public OrderController(UserManager<ApplicationUser> userManager, FuelDbContext fuelContext, IStringLocalizer stringLocalizer)
+        public OrderController(UserManager<ApplicationUser> userManager, FuelDbContext fuelContext, IStringLocalizer stringLocalizer, IConfiguration configuration, ILogger<OrderModel> logger)
         {
             _userManager = userManager;
-            _orderModel = new OrderModel(fuelContext, stringLocalizer);
+            _orderModel = new OrderModel(fuelContext, stringLocalizer, configuration, logger);
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -30,13 +33,15 @@ namespace MobileFueling.Api.Controllers.v1
         /// </summary>
         /// <param name="request">Запрос (контракт)</param>
         /// <returns>Список заказов</returns>
-        [HttpGet]
+        /// <remarks>Обратите внимание, что метод имеет тип Post, т.к. GET/HEAD не может иметь body</remarks>
+        [Authorize]
+        [HttpPost("all", Name = "GetAllOrders")]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
-        public async Task<OrderGetAllResponse> Get(OrderGetAllRequest request)
+        public async Task<OrderPostAllResponse> PostAll([FromBody] OrderPostAllRequest request)
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            return await _orderModel.GetAll(currentUser, request);
+            return await _orderModel.PostAll(currentUser, request);
         }
 
         /// <summary>
@@ -44,6 +49,7 @@ namespace MobileFueling.Api.Controllers.v1
         /// </summary>
         /// <param name="id">Идентификатор заказа</param>
         /// <returns>Заказ</returns>
+        [Authorize]
         [HttpGet("{id}", Name = "GetOrder")]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
@@ -54,17 +60,17 @@ namespace MobileFueling.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Обновление клиентом деталей заказа
+        /// Добавление/обновление клиентом деталей заказа
         /// </summary>
-        /// <param name="request">Запрос (контракт(</param>
+        /// <param name="request">Запрос (контракт)</param>
         /// <returns>Заказ</returns>
-        [HttpPost]
+        [HttpPost(Name = "PostOrder")]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
         public async Task<OrderUpdateResponse> Post([FromBody] OrderUpdateRequest request)
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            return await _orderModel.PostOne(currentUser, request);
+            return await _orderModel.PostOne(currentUser, _configuration, request);
         }
 
         /// <summary>
@@ -73,6 +79,7 @@ namespace MobileFueling.Api.Controllers.v1
         /// <param name="id"></param>
         /// <param name="request"></param>
         /// <returns>Ответ (контракт)</returns>
+        [Authorize]
         [HttpPut("{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
@@ -88,6 +95,7 @@ namespace MobileFueling.Api.Controllers.v1
         /// <param name="id"></param>
         /// <param name="status"></param>
         /// <returns>Ответ (контракт)</returns>
+        [Authorize]
         [HttpPut("{id}/{status}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]

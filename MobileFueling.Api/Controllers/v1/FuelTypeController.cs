@@ -65,6 +65,7 @@ namespace MobileFueling.Api.Controllers.v1
         /// Удаление типа топлива
         /// </summary>
         /// <param name="id">Идентификатор</param>
+        /// <returns>Ответ на удаление типов топлива</returns>
         [Authorize]
         [HttpDelete("{id}")]
         [ProducesResponseType(200)]
@@ -72,6 +73,21 @@ namespace MobileFueling.Api.Controllers.v1
         public async Task<FuelTypeDeleteResponse> Delete(long id)
         {
             return await _fuelTypeModel.DeleteOne(id);
+        }
+
+        /// <summary>
+        /// Метод добавляет цену для типа топлива
+        /// </summary>
+        /// <param name="id">Идентификатор типа топлива</param>
+        /// <param name="request">Запрос</param>
+        /// <returns>Тип топлива</returns>
+        [Authorize]
+        [HttpPut("{id}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(401)]
+        public async Task<FuelTypePutOneResponse> Put(long id, [FromBody] FuelTypePutOneRequest request)
+        {
+            return await _fuelTypeModel.PutOne(id, request);
         }
     }
 }

@@ -199,6 +199,8 @@ namespace MobileFueling.DB.Migrations
 
                     b.Property<bool>("IsDefault");
 
+                    b.Property<string>("RegNumber");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ClientId");
@@ -217,9 +219,17 @@ namespace MobileFueling.DB.Migrations
                     b.Property<string>("Address")
                         .HasMaxLength(250);
 
-                    b.Property<long>("ClientId");
+                    b.Property<long?>("ClientId");
+
+                    b.Property<string>("ClientPhone");
+
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("decimal(11,2)");
 
                     b.Property<DateTime>("CreationDate");
+
+                    b.Property<decimal>("FuelPrice")
+                        .HasColumnType("decimal(8,2)");
 
                     b.Property<long>("FuelTypeId");
 
@@ -232,6 +242,8 @@ namespace MobileFueling.DB.Migrations
                         .HasColumnType("decimal(10,6)");
 
                     b.Property<long>("OrderId");
+
+                    b.Property<string>("PaymentIdempotenceKey");
 
                     b.Property<decimal>("Quantity")
                         .HasColumnType("decimal(7,2)");
@@ -266,6 +278,26 @@ namespace MobileFueling.DB.Migrations
                     b.HasIndex("OrderId");
 
                     b.ToTable("DriverOrderDetalizations");
+                });
+
+            modelBuilder.Entity("MobileFueling.Model.FuelPrice", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("ChangedDate");
+
+                    b.Property<long>("FuelTypeId");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(8,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FuelTypeId");
+
+                    b.ToTable("FuelPrices");
                 });
 
             modelBuilder.Entity("MobileFueling.Model.FuelType", b =>
@@ -404,8 +436,7 @@ namespace MobileFueling.DB.Migrations
                 {
                     b.HasOne("MobileFueling.Model.Client", "Client")
                         .WithMany()
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("ClientId");
 
                     b.HasOne("MobileFueling.Model.FuelType", "FuelType")
                         .WithMany()
@@ -429,6 +460,14 @@ namespace MobileFueling.DB.Migrations
                         .WithMany()
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("MobileFueling.Model.FuelPrice", b =>
+                {
+                    b.HasOne("MobileFueling.Model.FuelType", "FuelType")
+                        .WithMany()
+                        .HasForeignKey("FuelTypeId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("MobileFueling.Model.OrderStatusHistory", b =>

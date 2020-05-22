@@ -8,6 +8,7 @@
         Created = 0,
         DriverAssigned,
         Completed,
-        Cancelled
+        Cancelled,
+        Paid
     }
 }

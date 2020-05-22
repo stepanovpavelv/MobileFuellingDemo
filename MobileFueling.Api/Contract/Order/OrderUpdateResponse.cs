@@ -8,5 +8,7 @@ namespace MobileFueling.Api.Contract.Order
     public class OrderUpdateResponse : BaseResponse
     {
         public long Id { get; set; }
+
+        public string PaymentLink { get; set; }
     }
 }

@@ -23,13 +23,19 @@ namespace MobileFueling.ViewModel
     /// </summary>
     public class ClientDetalizationVM
     {
-        public long ClientId { get; set; }
+        public long? ClientId { get; set; }
+
+        public string ClientPhone { get; set; }
 
         public System.DateTime CreationDate { get; set; }
 
         public string Address { get; set; }
 
         public decimal Quantity { get; set; }
+
+        public decimal Price { get; set; }
+
+        public decimal Cost { get; set; }
 
         public FuelTypeVM FuelType { get; set; }
 

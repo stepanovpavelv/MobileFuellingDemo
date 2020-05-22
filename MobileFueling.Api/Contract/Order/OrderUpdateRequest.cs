@@ -7,11 +7,13 @@
     {
         public long? Id { get; set; }
 
-        public long ClientId { get; set; }
+        public string ClientPhone { get; set; }
 
         public string Address { get; set; }
 
         public decimal Quantity { get; set; }
+
+        public decimal Price { get; set; }
 
         public long FuelTypeId { get; set; }
 
